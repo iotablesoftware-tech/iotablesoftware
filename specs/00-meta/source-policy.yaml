@@ -1,0 +1,55 @@
+id: "00-meta.source-policy"
+title: "Source Policy"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define source authority hierarchy and how external and internal sources are used to derive requirements and decisions for IoTable."
+  binding_policy: "Source authority determines what can create or modify requirements. Product-owner decisions remain the highest authority for product behavior."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  research_policy: "specs/00-meta/research-policy.yaml"
+
+source_authority_levels:
+  requirement_id: "00-meta.source-policy.REQ-001"
+  levels:
+    project_owner_binding_decision: "binding"
+    canonical_repository_specification: "binding"
+    official_technical_documentation: "high"
+    formal_standard_or_rfc: "high"
+    vendor_security_guidance: "high"
+    widely_adopted_community_practice: "medium"
+    blog_post_or_unverified_source: "low"
+    llm_memory: "none"
+
+product_behavior_policy:
+  requirement_id: "00-meta.source-policy.REQ-002"
+  product_behavior_must_come_from:
+    - "project_owner_binding_decision"
+    - "canonical_repository_specification"
+  external_sources_must_not_define_product_behavior: true
+
+external_source_usage:
+  requirement_id: "00-meta.source-policy.REQ-003"
+  allowed_for:
+    - "technical_constraints"
+    - "framework_usage"
+    - "security_practices"
+    - "performance_guidance"
+  must_be_translated_into_repository_specification: true
+
+conflict_resolution:
+  requirement_id: "00-meta.source-policy.REQ-004"
+  conflicts_within_repository_must_be_resolved_by:
+    - "project_owner_decision"
+  external_source_conflicts_must_be_resolved_by:
+    - "project_owner_decision"
+  unresolved_conflicts_block_progress: true
+
+traceability:
+  source_type: "repository_governance"
+  source_reference:
+    - "specs/00-meta/specification-constitution.yaml"
+
+open_decisions: []
