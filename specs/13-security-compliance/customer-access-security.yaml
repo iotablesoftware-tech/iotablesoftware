@@ -1,0 +1,43 @@
+id: "13-security-compliance.customer-access-security"
+title: "Customer Access Security"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define customer and tenant user access security requirements for IoTable."
+  binding_policy: "All access to tenant data must be tenant-scoped, authenticated, authorized, and auditable where required."
+
+authority:
+  security: "specs/03-technical/security.yaml"
+  user_and_access: "specs/01-domain/user-and-access.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+
+access_security:
+  requirement_id: "13-security.customer-access.REQ-001"
+  tenant_scoped_access_required: true
+  cross_tenant_access_forbidden: true
+  jwt_must_match_resolved_tenant: true
+  server_side_authorization_required: true
+
+customer_data_protection:
+  requirement_id: "13-security.customer-access.REQ-002"
+  tenant_private_data_must_not_leak_to_other_tenants: true
+  error_messages_must_not_reveal_cross_tenant_entity_existence: true
+  logs_must_not_contain_sensitive_credentials: true
+
+critical_action_audit:
+  requirement_id: "13-security.customer-access.REQ-003"
+  audit_required_for:
+    - "login_failure"
+    - "staff_created"
+    - "order_cancelled"
+    - "payment_voided"
+    - "table_session_closed"
+    - "platform_support_access"
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/03-technical/security.yaml"
+
+open_decisions: []
