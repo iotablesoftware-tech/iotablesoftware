@@ -1,0 +1,41 @@
+id: "09-realtime-device-contracts.esp32-device-identity"
+title: "ESP32 Device Identity"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define optional ESP32 device identity rules for future tenant-scoped realtime/device integrations."
+  binding_policy: "ESP32 device support is optional and must not be required for the initial IoTable core product."
+
+authority:
+  product_baseline: "specs/01-product/product-baseline.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  security: "specs/03-technical/security.yaml"
+
+support_policy:
+  requirement_id: "09-device.esp32.REQ-001"
+  esp32_required_initially: false
+  esp32_allowed_as_future_extension: true
+  device_must_be_tenant_scoped: true
+  cross_tenant_device_identity_forbidden: true
+
+identity_model:
+  requirement_id: "09-device.esp32.REQ-002"
+  device_id_format: "ulid"
+  device_belongs_to_tenant: true
+  device_may_bind_to_table: true
+  device_secret_required_when_enabled: true
+
+security_rules:
+  requirement_id: "09-device.esp32.REQ-003"
+  device_credentials_must_not_be_shared_across_tenants: true
+  device_events_must_be_tenant_scoped: true
+  device_authentication_required_when_enabled: true
+
+traceability:
+  source_type: "future_extension"
+  source_reference:
+    - "specs/03-technical/security.yaml"
+    - "specs/03-technical/api-contracts.yaml"
+
+open_decisions: []
