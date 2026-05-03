@@ -191,4 +191,31 @@ decisions:
     affected_documents:
       - "specs/02-capabilities/customer-table-access.yaml"
 
+  - id: "DEC-2026-022"
+    status: "accepted"
+    decision: "Before implementation starts, the mandatory specification set is the strict core profile defined in the documentation index."
+    rationale: "A strict mandatory subset reduces ambiguity and prevents partial implementation starts."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_documents:
+      - "specs/00-meta/documentation-index.yaml"
+      - "specs/04-implementation/repository-contract.yaml"
+  - id: "DEC-2026-023"
+    status: "accepted"
+    decision: "Specification governance uses normative levels MUST, SHOULD, and MAY; unspecified normative requirements default to MUST."
+    rationale: "Normative levels improve execution clarity while preserving strict governance where needed."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_documents:
+      - "specs/00-meta/llm-execution-policy.yaml"
+  - id: "DEC-2026-024"
+    status: "accepted"
+    decision: "Schema parity enforcement follows a phased rollout. Current enforcement phase is phase_1_core."
+    rationale: "Phased enforcement preserves quality goals while keeping authoring and implementation workflows practical."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_documents:
+      - "specs/00-meta/llm-execution-policy.yaml"
+      - "specs/00-meta/documentation-index.yaml"
+
 open_decisions: []

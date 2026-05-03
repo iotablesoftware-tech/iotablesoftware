@@ -160,4 +160,37 @@ schema_behavior:
   schema_must_reject_unknown_structural_fields_when_possible: true
   schema_must_allow_domain_extension_only_when_explicitly_defined: true
 
+normative_language_policy:
+  levels:
+    MUST:
+      meaning: "Non-negotiable requirement. Violations block progress unless owner decision explicitly waives the requirement."
+    SHOULD:
+      meaning: "Strong recommendation. Deviations require documented rationale in task output."
+    MAY:
+      meaning: "Optional behavior permitted when it does not conflict with MUST or SHOULD requirements."
+  default_interpretation_when_unspecified: "MUST"
+
+schema_rollout_policy:
+  mode: "phased"
+  phases:
+    - phase: "phase_1_core"
+      required_groups:
+        - "specs/00-meta"
+        - "specs/01-product"
+        - "specs/01-domain"
+        - "specs/02-capabilities"
+        - "specs/03-technical"
+    - phase: "phase_2_operational"
+      required_groups:
+        - "specs/04-tenancy"
+        - "specs/04-implementation"
+        - "specs/07-api-contracts"
+        - "specs/08-data-contracts"
+        - "specs/12-operations-deployment"
+        - "specs/13-security-compliance"
+  enforcement:
+    current_phase: "phase_1_core"
+    missing_schema_in_current_phase_requires_blocker: true
+    missing_schema_outside_current_phase_requires_task_note: true
+
 open_decisions: []

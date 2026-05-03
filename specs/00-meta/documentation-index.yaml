@@ -117,6 +117,41 @@ final_state_authoring_policy:
   historical_change_notes_forbidden: true
   document_entries_must_not_describe_superseded_paths: true
 
+implementation_readiness_profiles:
+  strict_core:
+    description: "Minimum mandatory specification set required before the first implementation repository begins."
+    mandatory_documents:
+      - "specs/00-meta/specification-constitution.yaml"
+      - "specs/00-meta/documentation-index.yaml"
+      - "specs/00-meta/llm-execution-policy.yaml"
+      - "specs/00-meta/decision-records.yaml"
+      - "specs/01-product/product-baseline.yaml"
+      - "specs/01-domain/tenant.yaml"
+      - "specs/01-domain/user-and-access.yaml"
+      - "specs/01-domain/area-and-table.yaml"
+      - "specs/02-capabilities/table-service.yaml"
+      - "specs/02-capabilities/order-management.yaml"
+      - "specs/02-capabilities/menu-catalog.yaml"
+      - "specs/02-capabilities/payment-and-closing.yaml"
+      - "specs/02-capabilities/customer-table-access.yaml"
+      - "specs/03-technical/api-contracts.yaml"
+      - "specs/03-technical/data-model.yaml"
+      - "specs/03-technical/security.yaml"
+      - "specs/03-technical/observability.yaml"
+      - "specs/04-implementation/repository-contract.yaml"
+  core_extended:
+    description: "Recommended extension set for implementation planning, operational readiness, and compliance workflows."
+    recommended_documents:
+      - "specs/04-tenancy/tenant-resolution.yaml"
+      - "specs/04-tenancy/tenant-lifecycle-provisioning.yaml"
+      - "specs/07-api-contracts/platform-api.yaml"
+      - "specs/07-api-contracts/tenant-staff-identity-api.yaml"
+      - "specs/07-api-contracts/customer-order-api.yaml"
+      - "specs/12-operations-deployment/health-checks.yaml"
+      - "specs/12-operations-deployment/backup-and-restore.yaml"
+      - "specs/12-operations-deployment/slo-recovery-targets.yaml"
+      - "specs/13-security-compliance/customer-access-security.yaml"
+
 owner_decisions:
   - id: "DEC-2026-008"
     status: "accepted"
@@ -129,11 +164,4 @@ owner_decisions:
       - "specs/01-domain/tenant.yaml"
       - "specs/01-domain/area-and-table.yaml"
 
-open_decisions:
-  - id: "OD-2026-001"
-    status: "open"
-    question: "Which domain and capability documents are mandatory before the first implementation repository begins?"
-    owner: "product_owner"
-    affected_documents:
-      - "specs/00-meta/documentation-index.yaml"
-      - "specs/04-implementation/repository-contract.yaml"
+open_decisions: []
