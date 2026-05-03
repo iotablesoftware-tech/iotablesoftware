@@ -1,0 +1,30 @@
+id: "06-application-surfaces.platform-audit-catalog"
+title: "Platform Audit Catalog"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define platform and tenant audit event categories visible to support and implementation tooling."
+  binding_policy: "Audit events are persistent security and business records and must not be replaced by operational logs."
+
+authority:
+  security: "specs/03-technical/security.yaml"
+  observability: "specs/03-technical/observability.yaml"
+
+audit_categories:
+  requirement_id: "06-application-surfaces.audit.REQ-001"
+  categories:
+    - "authentication"
+    - "staff_management"
+    - "menu_management"
+    - "order_operation"
+    - "payment_operation"
+    - "table_session_operation"
+    - "platform_support_access"
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/03-technical/security.yaml"
+
+open_decisions: []
