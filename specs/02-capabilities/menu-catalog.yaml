@@ -1,0 +1,142 @@
+id: "02-capabilities.menu-catalog"
+title: "Menu Catalog Capability"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define tenant-owned menu catalog behavior, menu items, variants, pricing, and availability for IoTable."
+  binding_policy: "All menu data belongs to one tenant and is priced and managed by that tenant."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  user_and_access: "specs/01-domain/user-and-access.yaml"
+  order_management: "specs/02-capabilities/order-management.yaml"
+
+catalog_ownership:
+  tenant_catalog:
+    requirement_id: "02-capabilities.menu-catalog.REQ-001"
+    tenant_owns_catalog: true
+    shared_platform_catalog_forbidden: true
+    tenant_catalog_override_model_forbidden: true
+    description: "Each tenant creates, manages, and prices its own menu catalog."
+
+menu_model:
+  menu_category:
+    requirement_id: "02-capabilities.menu-catalog.REQ-002"
+    required_fields:
+      - "id"
+      - "tenant_id"
+      - "name"
+      - "sort_order"
+      - "availability_status"
+  menu_item:
+    requirement_id: "02-capabilities.menu-catalog.REQ-003"
+    required_fields:
+      - "id"
+      - "tenant_id"
+      - "category_id"
+      - "name"
+      - "description"
+      - "availability_status"
+      - "sort_order"
+    may_have_variants: true
+  menu_item_variant:
+    requirement_id: "02-capabilities.menu-catalog.REQ-004"
+    required: true
+    definition: "A variant represents a sellable form of a menu item, such as size, portion, or preparation option."
+    required_fields:
+      - "id"
+      - "tenant_id"
+      - "menu_item_id"
+      - "name"
+      - "price"
+      - "availability_status"
+
+pricing_policy:
+  current_price_only:
+    requirement_id: "02-capabilities.menu-catalog.REQ-005"
+    price_history_tracked: false
+    current_price_required: true
+    order_item_must_snapshot_price_at_time_of_order: true
+  tenant_pricing:
+    requirement_id: "02-capabilities.menu-catalog.REQ-006"
+    tenant_sets_own_prices: true
+    platform_price_override_forbidden: true
+    cross_tenant_price_sharing_forbidden: true
+  variant_pricing:
+    requirement_id: "02-capabilities.menu-catalog.REQ-007"
+    price_lives_on_variant: true
+    item_without_variant_requires_default_variant: true
+
+availability_policy:
+  manual_availability:
+    requirement_id: "02-capabilities.menu-catalog.REQ-008"
+    availability_managed_by_owner: true
+    automatic_stock_tracking_enabled: false
+    system_must_not_decrement_stock: true
+    system_must_not_infer_availability_from_sales: true
+  availability_status:
+    requirement_id: "02-capabilities.menu-catalog.REQ-009"
+    allowed_values:
+      - "available"
+      - "unavailable"
+  staff_visibility:
+    requirement_id: "02-capabilities.menu-catalog.REQ-010"
+    unavailable_items_visible_to_owner: true
+    unavailable_items_available_for_new_orders: false
+
+ordering_integration:
+  order_item_snapshot:
+    requirement_id: "02-capabilities.menu-catalog.REQ-011"
+    order_item_must_snapshot:
+      - "menu_item_id"
+      - "menu_item_name"
+      - "variant_id"
+      - "variant_name"
+      - "unit_price"
+      - "quantity"
+    later_price_changes_must_not_change_existing_order_items: true
+  order_creation_rules:
+    requirement_id: "02-capabilities.menu-catalog.REQ-012"
+    order_can_include_available_variants_only: true
+    unavailable_variant_rejected_for_new_order_items: true
+
+access_policy:
+  owner_permissions:
+    requirement_id: "02-capabilities.menu-catalog.REQ-013"
+    owner_can_create_update_delete_categories: true
+    owner_can_create_update_delete_items: true
+    owner_can_create_update_delete_variants: true
+    owner_can_update_prices: true
+    owner_can_update_availability: true
+  staff_permissions:
+    requirement_id: "02-capabilities.menu-catalog.REQ-014"
+    staff_can_view_available_catalog: true
+    staff_can_add_available_variants_to_orders: true
+    staff_cannot_update_catalog: true
+    staff_cannot_update_prices: true
+    staff_cannot_update_availability: true
+
+traceability:
+  source_type: "owner_decision"
+  source_reference:
+    - "DEC-2026-015"
+    - "specs/01-domain/tenant.yaml"
+    - "specs/01-domain/user-and-access.yaml"
+
+owner_decisions:
+  - id: "DEC-2026-015"
+    status: "accepted"
+    decision: "Menu catalogs are tenant-owned. Only current price is stored for catalog pricing. Menu items may have variants. Each tenant creates and prices its own products. Stock is not tracked by the system; owner manually manages availability."
+    rationale: "The catalog remains simple, tenant-specific, and operationally controlled by the owner without inventory automation."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_requirements:
+      - "02-capabilities.menu-catalog.REQ-001"
+      - "02-capabilities.menu-catalog.REQ-004"
+      - "02-capabilities.menu-catalog.REQ-005"
+      - "02-capabilities.menu-catalog.REQ-006"
+      - "02-capabilities.menu-catalog.REQ-008"
+
+open_decisions: []
