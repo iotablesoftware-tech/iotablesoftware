@@ -4,7 +4,7 @@ status: "canonical"
 version: "1.0.0"
 
 purpose:
-  primary_purpose: "Define the final-state product baseline for IoTable across tenant scope, users, operational surfaces, and core restaurant workflows."
+  primary_purpose: "Define the final-state product baseline for IoTable across tenant scope, users, customer-facing access, operational surfaces, and core restaurant workflows."
   binding_policy: "All domain, capability, technical, and implementation specifications must remain consistent with this product baseline."
 
 authority:
@@ -20,6 +20,8 @@ product_identity:
   primary_users:
     - "owner"
     - "staff"
+  customer_facing_actors:
+    - "customer_table_guest"
   primary_operational_context: "single business location per tenant"
 
 product_scope:
@@ -28,6 +30,9 @@ product_scope:
     - "tenant setup and isolation"
     - "area and table management"
     - "owner and staff access"
+    - "customer QR table access"
+    - "server-side customer cart"
+    - "customer order submission"
     - "menu catalog management"
     - "table sessions"
     - "independent submitted orders"
@@ -55,6 +60,8 @@ tenant_baseline:
     - "menu"
     - "orders"
     - "payments"
+    - "customer_access_tickets"
+    - "customer_carts"
     - "tenant_database"
   isolation_model: "database_per_tenant"
 
@@ -66,6 +73,7 @@ user_baseline:
   owner_count_per_tenant: 1
   max_active_staff_per_tenant: 30
   login_context_source: "tenant_subdomain"
+  customer_table_guest_is_not_tenant_user: true
 
 operational_model:
   requirement_id: "01-product.baseline.REQ-005"
@@ -74,6 +82,7 @@ operational_model:
   table_session_may_contain_multiple_orders: true
   submitted_orders_are_immutable_work_units: true
   additional_items_after_submission_create_new_order: true
+  customer_submitted_orders_use_same_order_model: true
 
 catalog_model:
   requirement_id: "01-product.baseline.REQ-006"
@@ -92,10 +101,19 @@ payment_model:
   overpayments_supported: false
   table_session_close_is_manual: true
 
-technical_baseline:
+customer_access_model:
   requirement_id: "01-product.baseline.REQ-008"
+  customer_qr_ordering_included_in_initial_backend_scope: true
+  qr_join_required: true
+  customer_access_ticket_required: true
+  server_side_cart_required: true
+  fresh_qr_required_for_customer_order_submit: true
+
+technical_baseline:
+  requirement_id: "01-product.baseline.REQ-009"
   api_style: "rest"
-  authentication: "tenant_scoped_jwt"
+  authentication: "tenant_scoped_jwt_for_tenant_users"
+  customer_access: "qr_token_and_http_only_cookie_access_ticket"
   database_engine: "postgresql"
   identifier_format: "ulid"
   realtime_events_enabled: true
@@ -103,10 +121,12 @@ technical_baseline:
 traceability:
   source_type: "canonical_specification"
   source_reference:
+    - "DEC-2026-021"
     - "specs/01-domain/tenant.yaml"
     - "specs/01-domain/area-and-table.yaml"
     - "specs/01-domain/user-and-access.yaml"
     - "specs/02-capabilities/table-service.yaml"
+    - "specs/02-capabilities/customer-table-access.yaml"
     - "specs/02-capabilities/order-management.yaml"
     - "specs/02-capabilities/menu-catalog.yaml"
     - "specs/02-capabilities/payment-and-closing.yaml"
