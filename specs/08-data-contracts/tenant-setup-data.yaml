@@ -1,0 +1,22 @@
+id: "08-data-contracts.tenant-setup-data"
+title: "Tenant Setup Data"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define data requirements during tenant setup phase."
+
+contract:
+  requirement_id: "08-data.tenant-setup.REQ-001"
+  required_entities:
+    - "areas"
+    - "tables"
+    - "menu_items"
+  setup_must_initialize_minimum_operational_data: true
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/03-domain/tenant-setup-workflows.yaml"
+
+open_decisions: []
