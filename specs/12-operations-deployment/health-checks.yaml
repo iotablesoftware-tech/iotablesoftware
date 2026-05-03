@@ -1,0 +1,28 @@
+id: "12-operations-deployment.health-checks"
+title: "Health Checks"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define health check requirements for backend service and tenant database connectivity."
+  binding_policy: "Health endpoints must accurately reflect system readiness and liveness."
+
+health_endpoints:
+  requirement_id: "12-ops.health.REQ-001"
+  liveness:
+    path: "/health/live"
+    must_verify:
+      - "process_running"
+  readiness:
+    path: "/health/ready"
+    must_verify:
+      - "platform_registry_connection"
+      - "tenant_database_routing_available"
+      - "critical_dependencies_available"
+
+rules:
+  requirement_id: "12-ops.health.REQ-002"
+  readiness_must_fail_if_dependencies_unavailable: true
+  liveness_must_not_depend_on_external_services: true
+
+open_decisions: []
