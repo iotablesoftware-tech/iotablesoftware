@@ -1,0 +1,34 @@
+id: "03-domain.bill-session-workflow"
+title: "Bill Session Workflow"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define bill and settlement workflow as the payable view of a table session."
+  binding_policy: "Bill behavior must derive from table sessions, immutable orders, order item price snapshots, and recorded payments."
+
+authority:
+  table_service: "specs/02-capabilities/table-service.yaml"
+  order_management: "specs/02-capabilities/order-management.yaml"
+  payment_and_closing: "specs/02-capabilities/payment-and-closing.yaml"
+
+bill_model:
+  requirement_id: "03-domain.bill-session.REQ-001"
+  bill_is_derived_from_table_session: true
+  separate_bill_session_entity_required: false
+  payable_total_source: "orders_in_table_session"
+  payment_total_source: "non_voided_payments_in_table_session"
+
+bill_closing:
+  requirement_id: "03-domain.bill-session.REQ-002"
+  bill_considered_settled_when_unpaid_balance_is_zero: true
+  table_session_close_remains_manual: true
+  tips_supported: false
+  overpayments_supported: false
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/02-capabilities/payment-and-closing.yaml"
+
+open_decisions: []
