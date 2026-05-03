@@ -1,0 +1,74 @@
+id: "01-domain.area-and-table"
+title: "Area and Table Domain"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define tenant-owned operational areas and tables, including identity, hierarchy, and service location behavior."
+  binding_policy: "All operational flows involving tables must resolve through tenant → area → table hierarchy."
+
+core_model:
+  area:
+    requirement_id: "01-domain.area.REQ-001"
+    definition: "An area represents a logical or physical section within a tenant location (e.g., indoor, terrace, bar)."
+    belongs_to: "tenant"
+    required: true
+    attributes:
+      - "id"
+      - "tenant_id"
+      - "name"
+      - "status"
+  table:
+    requirement_id: "01-domain.table.REQ-001"
+    definition: "A table represents a service location where orders are created and managed."
+    belongs_to: "area"
+    required: true
+    attributes:
+      - "id"
+      - "tenant_id"
+      - "area_id"
+      - "display_name"
+      - "status"
+      - "capacity"
+      - "canonical_key"
+
+relationships:
+  tenant_to_area:
+    requirement_id: "01-domain.area.REQ-002"
+    model: "tenant_has_many_areas"
+  area_to_table:
+    requirement_id: "01-domain.table.REQ-002"
+    model: "area_has_many_tables"
+
+identity_policy:
+  table_canonical_key:
+    requirement_id: "01-domain.table.REQ-003"
+    format: "{tenant_id}.{area_id}.{table_id}"
+    globally_unique: true
+    immutable: true
+  display_name:
+    requirement_id: "01-domain.table.REQ-004"
+    required: true
+    mutable: true
+    user_facing: true
+
+status_model:
+  area_status:
+    requirement_id: "01-domain.area.REQ-003"
+    allowed_values:
+      - "active"
+      - "inactive"
+  table_status:
+    requirement_id: "01-domain.table.REQ-005"
+    allowed_values:
+      - "available"
+      - "occupied"
+      - "reserved"
+      - "out_of_service"
+
+traceability:
+  source_type: "owner_decision"
+  source_reference:
+    - "DEC-2026-008"
+
+open_decisions: []
