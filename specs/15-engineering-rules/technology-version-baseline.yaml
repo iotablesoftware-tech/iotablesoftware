@@ -1,0 +1,53 @@
+id: "15-engineering-rules.technology-version-baseline"
+title: "Technology Version Baseline"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define baseline technology expectations for IoTable implementation repositories without introducing unnecessary infrastructure complexity."
+  binding_policy: "Implementation repositories must use technologies compatible with the canonical product, API, data, security, and deployment specifications."
+
+authority:
+  product_baseline: "specs/01-product/product-baseline.yaml"
+  architecture_style: "specs/02-system-architecture/architecture-style.yaml"
+  api_contracts: "specs/03-technical/api-contracts.yaml"
+  data_model: "specs/03-technical/data-model.yaml"
+  security: "specs/03-technical/security.yaml"
+
+required_baselines:
+  requirement_id: "15-engineering.technology.REQ-001"
+  database_engine: "postgresql"
+  api_style: "rest"
+  authentication_style: "tenant_scoped_jwt"
+  identifier_format: "ulid"
+  realtime_transport: "websocket_or_equivalent_realtime_events"
+  deployment_style: "simple_service_deployment"
+
+forbidden_initial_complexity:
+  requirement_id: "15-engineering.technology.REQ-002"
+  kubernetes_required: false
+  tenant_per_container_required: false
+  microservices_required: false
+  event_broker_required: false
+
+version_selection_policy:
+  requirement_id: "15-engineering.technology.REQ-003"
+  exact_runtime_versions_defined_in_implementation_repository: true
+  implementation_repository_must_document_runtime_versions: true
+  version_sensitive_choices_require_research_policy: true
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/00-meta/research-policy.yaml"
+    - "specs/02-system-architecture/architecture-style.yaml"
+    - "specs/03-technical/data-model.yaml"
+
+open_decisions:
+  - id: "OD-2026-009"
+    status: "open"
+    question: "Which backend runtime and framework are canonical for the first implementation repository?"
+    owner: "product_owner"
+    affected_documents:
+      - "specs/15-engineering-rules/technology-version-baseline.yaml"
+      - "specs/04-implementation/backend-service-contract.yaml"
