@@ -1,0 +1,174 @@
+id: "03-technical.api-contracts"
+title: "API Contracts"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define API style, tenant resolution, authentication contract, realtime contract, request behavior, response behavior, and error conventions for IoTable implementation repositories."
+  binding_policy: "All backend APIs must follow these contracts unless a higher-authority specification explicitly defines a narrower behavior."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  user_and_access: "specs/01-domain/user-and-access.yaml"
+  table_service: "specs/02-capabilities/table-service.yaml"
+  order_management: "specs/02-capabilities/order-management.yaml"
+  menu_catalog: "specs/02-capabilities/menu-catalog.yaml"
+  payment_and_closing: "specs/02-capabilities/payment-and-closing.yaml"
+
+api_style:
+  requirement_id: "03-technical.api.REQ-001"
+  style: "rest"
+  graphql_supported: false
+  route_payload_format: "json"
+  response_payload_format: "json"
+
+base_contract:
+  requirement_id: "03-technical.api.REQ-002"
+  api_prefix: "/api"
+  version_prefix_required: true
+  initial_version_prefix: "/api/v1"
+  all_routes_require_tenant_resolution_except:
+    - "/api/v1/health"
+    - "/api/v1/platform/tenants/resolve"
+
+tenant_resolution:
+  requirement_id: "03-technical.api.REQ-003"
+  canonical_source: "subdomain"
+  subdomain_must_resolve_before_authentication: true
+  unresolved_tenant_response_status: 404
+  resolved_tenant_context_must_include:
+    - "tenant_id"
+    - "tenant_database_connection_reference"
+    - "tenant_status"
+  tenant_context_must_not_be_trusted_from_client_body: true
+
+authentication:
+  requirement_id: "03-technical.api.REQ-004"
+  mechanism: "jwt"
+  token_scope: "single_tenant"
+  token_must_include:
+    - "tenant_id"
+    - "user_id"
+    - "user_type"
+  token_must_not_be_valid_across_tenants: true
+  login_route_requires_resolved_tenant: true
+  credentials_validated_against_tenant_database: true
+
+authorization:
+  requirement_id: "03-technical.api.REQ-005"
+  role_model: "owner_staff"
+  authorization_must_be_server_side: true
+  owner_routes_must_reject_staff: true
+  staff_routes_must_reject_missing_or_invalid_tenant_session: true
+
+request_contract:
+  requirement_id: "03-technical.api.REQ-006"
+  request_body_format: "json"
+  unknown_fields_policy: "reject_when_contract_defined"
+  client_generated_ids_allowed: false
+  server_generated_id_format: "ulid"
+  idempotency_key_required_for:
+    - "payment_recording"
+    - "order_submission"
+    - "table_session_closing"
+
+response_contract:
+  requirement_id: "03-technical.api.REQ-007"
+  success_response_shape:
+    object: "data"
+    metadata_object: "meta"
+  error_response_shape:
+    object: "error"
+    required_error_fields:
+      - "code"
+      - "message"
+      - "request_id"
+  timestamps_format: "iso_8601"
+
+error_contract:
+  requirement_id: "03-technical.api.REQ-008"
+  standard_statuses:
+    validation_error: 400
+    unauthenticated: 401
+    forbidden: 403
+    not_found: 404
+    conflict: 409
+    unprocessable: 422
+    rate_limited: 429
+    internal_error: 500
+  tenant_not_found_must_not_reveal_other_tenant_data: true
+  authorization_errors_must_not_reveal_cross_tenant_existence: true
+
+realtime_contract:
+  requirement_id: "03-technical.api.REQ-009"
+  enabled: true
+  transport: "websocket_or_equivalent_realtime_events"
+  event_scope: "tenant"
+  realtime_auth_mechanism: "jwt"
+  realtime_connection_must_bind_to:
+    - "tenant_id"
+    - "user_id"
+    - "user_type"
+  cross_tenant_event_delivery_forbidden: true
+  canonical_event_envelope:
+    required_fields:
+      - "event_id"
+      - "tenant_id"
+      - "type"
+      - "occurred_at"
+      - "payload"
+
+canonical_event_types:
+  requirement_id: "03-technical.api.REQ-010"
+  values:
+    - "table.state_changed"
+    - "table_session.created"
+    - "table_session.closed"
+    - "order.created"
+    - "order.submitted"
+    - "order.status_changed"
+    - "order_item.status_changed"
+    - "payment.recorded"
+    - "payment.voided"
+    - "balance.changed"
+    - "menu.availability_changed"
+
+route_groups:
+  requirement_id: "03-technical.api.REQ-011"
+  groups:
+    auth:
+      prefix: "/api/v1/auth"
+    areas:
+      prefix: "/api/v1/areas"
+    tables:
+      prefix: "/api/v1/tables"
+    table_sessions:
+      prefix: "/api/v1/table-sessions"
+    menu:
+      prefix: "/api/v1/menu"
+    orders:
+      prefix: "/api/v1/orders"
+    payments:
+      prefix: "/api/v1/payments"
+
+traceability:
+  source_type: "owner_decision"
+  source_reference:
+    - "DEC-2026-018"
+    - "specs/01-domain/tenant.yaml"
+    - "specs/01-domain/user-and-access.yaml"
+
+owner_decisions:
+  - id: "DEC-2026-018"
+    status: "accepted"
+    decision: "IoTable uses REST APIs, realtime events, and JWT authentication."
+    rationale: "REST keeps the API simple, realtime events support live operations, and JWT matches tenant-scoped stateless authentication."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_requirements:
+      - "03-technical.api.REQ-001"
+      - "03-technical.api.REQ-004"
+      - "03-technical.api.REQ-009"
+
+open_decisions: []
