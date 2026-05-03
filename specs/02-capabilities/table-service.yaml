@@ -53,6 +53,7 @@ ordering_context:
   table_session:
     requirement_id: "02-capabilities.table-service.REQ-005"
     required: true
+    creation_mode: "automatic_with_first_order"
     definition: "A table session represents a period of guest service at a table and may contain multiple active orders."
     belongs_to: "table"
     may_contain_multiple_orders: true
@@ -67,6 +68,7 @@ operational_rules:
       - "reserved"
     forbidden_when_table_states:
       - "out_of_service"
+    creates_table_session_when_no_open_session_exists: true
     creating_order_may_mark_table_occupied: true
   close_order:
     requirement_id: "02-capabilities.table-service.REQ-007"
@@ -110,6 +112,7 @@ traceability:
   source_type: "owner_decision"
   source_reference:
     - "DEC-2026-012"
+    - "DEC-2026-013"
     - "specs/01-domain/area-and-table.yaml"
     - "specs/01-domain/user-and-access.yaml"
 
@@ -125,12 +128,14 @@ owner_decisions:
       - "02-capabilities.table-service.REQ-002"
       - "02-capabilities.table-service.REQ-003"
       - "02-capabilities.table-service.REQ-007"
-
-open_decisions:
-  - id: "OD-2026-007"
-    status: "open"
-    question: "Should a table session be created automatically with the first order, or explicitly opened by staff before orders are added?"
+  - id: "DEC-2026-013"
+    status: "accepted"
+    decision: "A table session is created automatically when the first order is created for a table without an open session."
+    rationale: "Automatic session creation keeps the service flow fast and prevents staff from needing a separate open-table action before taking an order."
+    date: "2026-05-03"
     owner: "product_owner"
     affected_requirements:
       - "02-capabilities.table-service.REQ-005"
       - "02-capabilities.table-service.REQ-006"
+
+open_decisions: []
