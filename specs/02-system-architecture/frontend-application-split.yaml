@@ -1,0 +1,32 @@
+id: "02-system-architecture.frontend-application-split"
+title: "Frontend Application Split"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define frontend application boundaries and responsibilities for IoTable."
+  binding_policy: "Frontend implementations must remain aligned with tenant isolation, API contracts, and realtime event consumption."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  api_contracts: "specs/03-technical/api-contracts.yaml"
+
+frontend_surfaces:
+  requirement_id: "02-system-architecture.frontend.REQ-001"
+  applications:
+    - "staff_operational_ui"
+    - "owner_management_ui"
+
+frontend_rules:
+  requirement_id: "02-system-architecture.frontend.REQ-002"
+  frontend_must_use_rest_api: true
+  frontend_must_use_realtime_events: true
+  frontend_must_not_store_sensitive_credentials: true
+  frontend_must_not_bypass_backend_authorization: true
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/03-technical/api-contracts.yaml"
+
+open_decisions: []
