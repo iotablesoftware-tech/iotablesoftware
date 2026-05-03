@@ -1,0 +1,136 @@
+id: "02-capabilities.table-service"
+title: "Table Service Capability"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define table lifecycle, service state, ordering context, and table-level operational behavior for IoTable."
+  binding_policy: "All table-related operations must follow the tenant → area → table hierarchy and must preserve tenant isolation."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  area_and_table_domain: "specs/01-domain/area-and-table.yaml"
+  user_and_access_domain: "specs/01-domain/user-and-access.yaml"
+
+state_model:
+  table_states:
+    requirement_id: "02-capabilities.table-service.REQ-001"
+    allowed_values:
+      - "available"
+      - "occupied"
+      - "reserved"
+      - "out_of_service"
+  state_ownership:
+    requirement_id: "02-capabilities.table-service.REQ-002"
+    table_state_is_independent_from_order_closure: true
+    order_closure_does_not_automatically_mark_table_available: true
+    staff_or_owner_action_controls_table_state: true
+  state_meanings:
+    available:
+      description: "The table is ready for service."
+    occupied:
+      description: "The table is in active use by guests."
+    reserved:
+      description: "The table is held for expected guests or planned service."
+    out_of_service:
+      description: "The table is not available for operational service."
+
+ordering_context:
+  active_orders_per_table:
+    requirement_id: "02-capabilities.table-service.REQ-003"
+    multiple_active_orders_allowed: true
+    active_order_count_limit: null
+    order_context_must_reference_table: true
+  order_table_binding:
+    requirement_id: "02-capabilities.table-service.REQ-004"
+    order_must_reference:
+      - "tenant_id"
+      - "area_id"
+      - "table_id"
+      - "table_canonical_key"
+    table_state_does_not_replace_order_status: true
+  table_session:
+    requirement_id: "02-capabilities.table-service.REQ-005"
+    required: true
+    definition: "A table session represents a period of guest service at a table and may contain multiple active orders."
+    belongs_to: "table"
+    may_contain_multiple_orders: true
+    can_remain_open_after_individual_order_closure: true
+
+operational_rules:
+  create_order_on_table:
+    requirement_id: "02-capabilities.table-service.REQ-006"
+    allowed_when_table_states:
+      - "available"
+      - "occupied"
+      - "reserved"
+    forbidden_when_table_states:
+      - "out_of_service"
+    creating_order_may_mark_table_occupied: true
+  close_order:
+    requirement_id: "02-capabilities.table-service.REQ-007"
+    closes_only_target_order: true
+    does_not_close_table_session_unless_explicitly_requested: true
+    does_not_change_table_state_unless_explicit_staff_or_owner_action_requests_it: true
+  close_table_session:
+    requirement_id: "02-capabilities.table-service.REQ-008"
+    requires_no_unpaid_orders: true
+    may_mark_table_available: true
+    explicit_action_required: true
+
+concurrency_policy:
+  requirement_id: "02-capabilities.table-service.REQ-009"
+  concurrent_order_creation_allowed: true
+  table_session_must_use_concurrency_control: true
+  conflicting_table_state_updates_must_be_rejected_or_retried: true
+  implementation_must_prevent_duplicate_session_close: true
+
+access_policy:
+  requirement_id: "02-capabilities.table-service.REQ-010"
+  owner_can_manage_table_state: true
+  staff_can_manage_table_state: true
+  owner_can_create_table_orders: true
+  staff_can_create_table_orders: true
+  operations_must_be_tenant_scoped: true
+
+realtime_policy:
+  requirement_id: "02-capabilities.table-service.REQ-011"
+  table_state_changes_emit_event: true
+  order_binding_changes_emit_event: true
+  table_session_changes_emit_event: true
+  event_scope: "tenant"
+  event_payload_must_include:
+    - "tenant_id"
+    - "area_id"
+    - "table_id"
+    - "table_canonical_key"
+
+traceability:
+  source_type: "owner_decision"
+  source_reference:
+    - "DEC-2026-012"
+    - "specs/01-domain/area-and-table.yaml"
+    - "specs/01-domain/user-and-access.yaml"
+
+owner_decisions:
+  - id: "DEC-2026-012"
+    status: "accepted"
+    decision: "Tables use the extended state model. A table may have multiple active orders, and order closure does not automatically make the table available."
+    rationale: "Table state and order lifecycle remain independent so staff can model real restaurant operations more flexibly."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_requirements:
+      - "02-capabilities.table-service.REQ-001"
+      - "02-capabilities.table-service.REQ-002"
+      - "02-capabilities.table-service.REQ-003"
+      - "02-capabilities.table-service.REQ-007"
+
+open_decisions:
+  - id: "OD-2026-007"
+    status: "open"
+    question: "Should a table session be created automatically with the first order, or explicitly opened by staff before orders are added?"
+    owner: "product_owner"
+    affected_requirements:
+      - "02-capabilities.table-service.REQ-005"
+      - "02-capabilities.table-service.REQ-006"
