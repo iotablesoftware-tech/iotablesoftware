@@ -1,0 +1,22 @@
+id: "07-api-contracts.platform-api"
+title: "Platform API"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define platform-level APIs for tenant provisioning and status management."
+
+routes:
+  requirement_id: "07-api.platform.REQ-001"
+  create_tenant:
+    method: "POST"
+    path: "/api/v1/platform/tenants"
+  update_tenant_status:
+    method: "PATCH"
+    path: "/api/v1/platform/tenants/{tenant_id}/status"
+
+rules:
+  requirement_id: "07-api.platform.REQ-002"
+  platform_api_must_not_access_tenant_operational_data: true
+
+open_decisions: []
