@@ -1,0 +1,127 @@
+id: "00-meta.documentation-index"
+title: "Documentation Index"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define the canonical documentation map for IoTable specification authors, implementation repositories, human developers, and LLM coding agents."
+  binding_policy: "Agents and developers must use this index to locate authoritative specification documents before authoring or implementation work."
+
+repository_layout:
+  canonical_root: "."
+  required_directories:
+    - path: "specs/"
+      purpose: "Canonical YAML specification documents."
+    - path: "schemas/"
+      purpose: "JSON Schemas for validating specification documents."
+    - path: "tools/"
+      purpose: "Validation and maintenance tooling."
+  implementation_code_location: "external_repositories"
+
+read_order:
+  for_any_task:
+    - "specs/00-meta/specification-constitution.yaml"
+    - "specs/00-meta/documentation-index.yaml"
+    - "specs/00-meta/llm-execution-policy.yaml"
+  for_spec_authoring:
+    - "specs/00-meta/specification-constitution.yaml"
+    - "specs/00-meta/documentation-index.yaml"
+    - "specs/00-meta/decision-records.yaml"
+    - "relevant_domain_or_capability_documents"
+    - "matching_schema_documents"
+  for_implementation_work:
+    - "specs/00-meta/specification-constitution.yaml"
+    - "specs/00-meta/documentation-index.yaml"
+    - "specs/00-meta/llm-execution-policy.yaml"
+    - "relevant_domain_or_capability_documents"
+    - "relevant_api_data_security_operational_documents"
+
+canonical_documents:
+  meta:
+    - path: "specs/00-meta/specification-constitution.yaml"
+      role: "Highest authority for specification governance, authoring rules, and implementation binding."
+      required: true
+    - path: "specs/00-meta/documentation-index.yaml"
+      role: "Canonical map of specification documents and required read order."
+      required: true
+    - path: "specs/00-meta/llm-execution-policy.yaml"
+      role: "Execution rules for LLM coding agents and assisted authoring workflows."
+      required: true
+    - path: "specs/00-meta/decision-records.yaml"
+      role: "Owner-approved final-state product and architecture decisions."
+      required: true
+  domains:
+    - path: "specs/01-domain/tenant.yaml"
+      role: "Tenant, ownership, isolation, and multi-tenant boundary model."
+      required: true
+    - path: "specs/01-domain/venue.yaml"
+      role: "Cafe, restaurant, physical venue, table, area, and service-location model."
+      required: true
+    - path: "specs/01-domain/user-and-access.yaml"
+      role: "Users, roles, permissions, authentication, and authorization model."
+      required: true
+  capabilities:
+    - path: "specs/02-capabilities/table-service.yaml"
+      role: "Table lifecycle, ordering context, service state, and operational flow."
+      required: true
+    - path: "specs/02-capabilities/menu-catalog.yaml"
+      role: "Menu items, categories, pricing, availability, and tenant-specific catalog behavior."
+      required: true
+    - path: "specs/02-capabilities/order-management.yaml"
+      role: "Order creation, updates, kitchen/service flow, status model, and constraints."
+      required: true
+    - path: "specs/02-capabilities/payment-and-closing.yaml"
+      role: "Payment intent, bill closing, receipt, split payment, and settlement behavior."
+      required: true
+  technical:
+    - path: "specs/03-technical/api-contracts.yaml"
+      role: "API contract principles, route ownership, payload behavior, and error model."
+      required: true
+    - path: "specs/03-technical/data-model.yaml"
+      role: "Canonical entities, relations, identifiers, data integrity, and persistence constraints."
+      required: true
+    - path: "specs/03-technical/security.yaml"
+      role: "Security, tenant isolation, authentication, authorization, secret handling, and audit behavior."
+      required: true
+    - path: "specs/03-technical/observability.yaml"
+      role: "Logging, metrics, traces, audit events, operational visibility, and diagnostics."
+      required: true
+  implementation_guides:
+    - path: "specs/04-implementation/repository-contract.yaml"
+      role: "Rules for downstream implementation repositories consuming this specification."
+      required: true
+    - path: "specs/04-implementation/backend-service-contract.yaml"
+      role: "Backend implementation boundaries, required project files, and verification commands."
+      required: true
+
+schema_index:
+  schema_root: "schemas/"
+  parity_required: true
+  rule: "Every YAML specification document must have a matching JSON Schema unless explicitly exempted by the constitution."
+  naming_policy:
+    yaml_spec_path: "specs/<group>/<document>.yaml"
+    schema_path: "schemas/<group>/<document>.schema.json"
+
+agent_navigation_policy:
+  agents_must_not_skip_meta_documents: true
+  agents_must_load_relevant_domain_documents_before_capability_documents: true
+  agents_must_load_security_and_data_documents_before_implementation_changes: true
+  missing_required_document_requires_blocker: true
+  blocker_fields:
+    - "missing_document"
+    - "required_for_task"
+    - "decision_needed"
+
+final_state_authoring_policy:
+  documents_in_this_index_describe_current_final_state: true
+  historical_change_notes_forbidden: true
+  document_entries_must_not_describe_superseded_paths: true
+
+open_decisions:
+  - id: "OD-2026-001"
+    status: "open"
+    question: "Which domain and capability documents are mandatory before the first implementation repository begins?"
+    owner: "product_owner"
+    affected_documents:
+      - "specs/00-meta/documentation-index.yaml"
+      - "specs/04-implementation/repository-contract.yaml"
