@@ -54,8 +54,8 @@ canonical_documents:
     - path: "specs/01-domain/tenant.yaml"
       role: "Tenant, ownership, isolation, and multi-tenant boundary model."
       required: true
-    - path: "specs/01-domain/venue.yaml"
-      role: "Cafe, restaurant, physical venue, table, area, and service-location model."
+    - path: "specs/01-domain/area-and-table.yaml"
+      role: "Tenant-owned operational areas, tables, table identity, and service-location model."
       required: true
     - path: "specs/01-domain/user-and-access.yaml"
       role: "Users, roles, permissions, authentication, and authorization model."
@@ -116,6 +116,18 @@ final_state_authoring_policy:
   documents_in_this_index_describe_current_final_state: true
   historical_change_notes_forbidden: true
   document_entries_must_not_describe_superseded_paths: true
+
+owner_decisions:
+  - id: "DEC-2026-008"
+    status: "accepted"
+    decision: "IoTable does not use a separate venue layer. A tenant directly represents the business location and owns areas and tables."
+    rationale: "The product model stays simple and aligns the operational hierarchy with tenant isolation."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_documents:
+      - "specs/00-meta/documentation-index.yaml"
+      - "specs/01-domain/tenant.yaml"
+      - "specs/01-domain/area-and-table.yaml"
 
 open_decisions:
   - id: "OD-2026-001"
