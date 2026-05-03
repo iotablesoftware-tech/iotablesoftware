@@ -1,0 +1,26 @@
+id: "07-api-contracts.tenant-staff-identity-api"
+title: "Tenant Staff Identity API"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define authentication and staff management APIs."
+
+routes:
+  requirement_id: "07-api.identity.REQ-001"
+  login:
+    method: "POST"
+    path: "/api/v1/auth/login"
+  create_staff:
+    method: "POST"
+    path: "/api/v1/staff"
+  disable_staff:
+    method: "POST"
+    path: "/api/v1/staff/{staff_id}/disable"
+
+rules:
+  requirement_id: "07-api.identity.REQ-002"
+  login_requires_tenant_resolution: true
+  staff_management_requires_owner: true
+
+open_decisions: []
