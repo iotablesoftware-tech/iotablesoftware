@@ -1,0 +1,21 @@
+id: "08-data-contracts.customer-order-data"
+title: "Customer Order Data"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define order and order item data rules aligned with immutable order model."
+
+contract:
+  requirement_id: "08-data.order.REQ-001"
+  orders_are_mutable_before_submission: true
+  orders_are_immutable_after_submission: true
+  order_items_store_snapshot_fields: true
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/03-technical/data-model.yaml"
+    - "specs/02-capabilities/order-management.yaml"
+
+open_decisions: []
