@@ -12,6 +12,7 @@ authority:
   tenant_domain: "specs/01-domain/tenant.yaml"
   area_and_table_domain: "specs/01-domain/area-and-table.yaml"
   user_and_access: "specs/01-domain/user-and-access.yaml"
+  customer_table_access: "specs/02-capabilities/customer-table-access.yaml"
   api_contracts: "specs/03-technical/api-contracts.yaml"
 
 persistence_technology:
@@ -34,8 +35,15 @@ identifier_policy:
   database_generated_primary_ids_allowed: false
   ids_must_be_immutable: true
 
-platform_registry:
+tenant_identifier_storage_policy:
   requirement_id: "03-technical.data-model.REQ-004"
+  tenant_database_tables_may_omit_tenant_id_when_database_boundary_identifies_tenant: true
+  platform_registry_records_require_tenant_id: true
+  audit_events_and_realtime_events_must_include_tenant_context: true
+  exported_or_cross_boundary_records_must_include_tenant_id: true
+
+platform_registry:
+  requirement_id: "03-technical.data-model.REQ-005"
   required: true
   contains_only_platform_routing_metadata: true
   must_not_store_tenant_operational_data: true
@@ -49,7 +57,7 @@ platform_registry:
 
 canonical_tenant_entities:
   users:
-    requirement_id: "03-technical.data-model.REQ-005"
+    requirement_id: "03-technical.data-model.REQ-006"
     table: "users"
     belongs_to_tenant_database: true
     fields:
@@ -64,7 +72,7 @@ canonical_tenant_entities:
       - "exactly_one_owner_user_per_tenant_database"
       - "max_30_active_staff_users_per_tenant_database"
   areas:
-    requirement_id: "03-technical.data-model.REQ-006"
+    requirement_id: "03-technical.data-model.REQ-007"
     table: "areas"
     fields:
       - "id"
@@ -72,7 +80,7 @@ canonical_tenant_entities:
       - "status"
       - "sort_order"
   tables:
-    requirement_id: "03-technical.data-model.REQ-007"
+    requirement_id: "03-technical.data-model.REQ-008"
     table: "tables"
     fields:
       - "id"
@@ -82,7 +90,7 @@ canonical_tenant_entities:
       - "status"
       - "capacity"
   menu_categories:
-    requirement_id: "03-technical.data-model.REQ-008"
+    requirement_id: "03-technical.data-model.REQ-009"
     table: "menu_categories"
     fields:
       - "id"
@@ -90,7 +98,7 @@ canonical_tenant_entities:
       - "sort_order"
       - "availability_status"
   menu_items:
-    requirement_id: "03-technical.data-model.REQ-009"
+    requirement_id: "03-technical.data-model.REQ-010"
     table: "menu_items"
     fields:
       - "id"
@@ -100,7 +108,7 @@ canonical_tenant_entities:
       - "availability_status"
       - "sort_order"
   menu_item_variants:
-    requirement_id: "03-technical.data-model.REQ-010"
+    requirement_id: "03-technical.data-model.REQ-011"
     table: "menu_item_variants"
     fields:
       - "id"
@@ -109,7 +117,7 @@ canonical_tenant_entities:
       - "price"
       - "availability_status"
   table_sessions:
-    requirement_id: "03-technical.data-model.REQ-011"
+    requirement_id: "03-technical.data-model.REQ-012"
     table: "table_sessions"
     fields:
       - "id"
@@ -118,7 +126,7 @@ canonical_tenant_entities:
       - "opened_at"
       - "closed_at"
   orders:
-    requirement_id: "03-technical.data-model.REQ-012"
+    requirement_id: "03-technical.data-model.REQ-013"
     table: "orders"
     fields:
       - "id"
@@ -126,10 +134,11 @@ canonical_tenant_entities:
       - "table_session_id"
       - "status"
       - "created_by_user_id"
+      - "created_by_customer_access_ticket_id"
       - "submitted_at"
       - "completed_at"
   order_items:
-    requirement_id: "03-technical.data-model.REQ-013"
+    requirement_id: "03-technical.data-model.REQ-014"
     table: "order_items"
     fields:
       - "id"
@@ -142,7 +151,7 @@ canonical_tenant_entities:
       - "quantity"
       - "status"
   payments:
-    requirement_id: "03-technical.data-model.REQ-014"
+    requirement_id: "03-technical.data-model.REQ-015"
     table: "payments"
     fields:
       - "id"
@@ -153,13 +162,56 @@ canonical_tenant_entities:
       - "status"
       - "created_by_user_id"
       - "created_at"
+  customer_qr_tokens:
+    requirement_id: "03-technical.data-model.REQ-016"
+    table: "customer_qr_tokens"
+    fields:
+      - "id"
+      - "table_id"
+      - "table_session_id"
+      - "token_hash"
+      - "expires_at"
+      - "consumed_at"
+      - "status"
+  customer_access_tickets:
+    requirement_id: "03-technical.data-model.REQ-017"
+    table: "customer_access_tickets"
+    fields:
+      - "id"
+      - "table_id"
+      - "table_session_id"
+      - "ticket_hash"
+      - "issued_at"
+      - "expires_at"
+      - "revoked_at"
+      - "status"
+  customer_carts:
+    requirement_id: "03-technical.data-model.REQ-018"
+    table: "customer_carts"
+    fields:
+      - "id"
+      - "customer_access_ticket_id"
+      - "table_session_id"
+      - "status"
+      - "created_at"
+      - "updated_at"
+  customer_cart_items:
+    requirement_id: "03-technical.data-model.REQ-019"
+    table: "customer_cart_items"
+    fields:
+      - "id"
+      - "customer_cart_id"
+      - "menu_item_id"
+      - "variant_id"
+      - "quantity"
   audit_events:
-    requirement_id: "03-technical.data-model.REQ-015"
+    requirement_id: "03-technical.data-model.REQ-020"
     table: "audit_events"
     required: true
     fields:
       - "id"
       - "actor_user_id"
+      - "actor_customer_access_ticket_id"
       - "event_type"
       - "entity_type"
       - "entity_id"
@@ -167,29 +219,36 @@ canonical_tenant_entities:
       - "metadata"
 
 relationship_rules:
-  requirement_id: "03-technical.data-model.REQ-016"
+  requirement_id: "03-technical.data-model.REQ-021"
   rules:
     - "areas_have_many_tables"
     - "tables_have_many_table_sessions"
     - "table_sessions_have_many_orders"
     - "table_sessions_have_many_payments"
+    - "table_sessions_have_many_customer_access_tickets"
+    - "customer_access_tickets_have_one_active_cart"
+    - "customer_carts_have_many_cart_items"
     - "orders_have_many_order_items"
     - "menu_items_have_many_variants"
     - "order_items_snapshot_catalog_fields"
 
 constraint_policy:
-  requirement_id: "03-technical.data-model.REQ-017"
+  requirement_id: "03-technical.data-model.REQ-022"
   monetary_values_must_use_decimal_not_float: true
   submitted_orders_are_immutable_except_status_progression: true
   payment_amount_must_not_make_balance_negative: true
   closed_table_sessions_must_not_accept_new_orders: true
+  closed_table_sessions_must_invalidate_customer_access_tickets: true
+  consumed_customer_qr_tokens_must_not_be_reused: true
   out_of_service_tables_must_not_accept_orders: true
 
 traceability:
   source_type: "owner_decision"
   source_reference:
     - "DEC-2026-019"
+    - "DEC-2026-021"
     - "specs/01-domain/tenant.yaml"
+    - "specs/02-capabilities/customer-table-access.yaml"
     - "specs/02-capabilities/order-management.yaml"
     - "specs/02-capabilities/payment-and-closing.yaml"
 
