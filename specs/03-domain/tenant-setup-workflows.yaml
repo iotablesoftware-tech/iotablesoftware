@@ -1,0 +1,25 @@
+id: "03-domain.tenant-setup-workflows"
+title: "Tenant Setup Workflows"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define tenant setup lifecycle and initial configuration workflows."
+
+workflow:
+  requirement_id: "03-domain.tenant-setup.REQ-001"
+  steps:
+    - "tenant_created"
+    - "owner_user_created"
+    - "initial_login"
+    - "areas_configured"
+    - "tables_configured"
+    - "menu_created"
+    - "tenant_activated"
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/01-domain/tenant.yaml"
+
+open_decisions: []
