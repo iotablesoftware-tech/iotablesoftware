@@ -5,7 +5,7 @@ version: "1.0.0"
 
 purpose:
   primary_purpose: "Define the tenant model, tenant isolation boundary, ownership scope, and tenant lifecycle for IoTable."
-  binding_policy: "All implementation repositories must treat tenant identity as a required security, data, and operational boundary."
+  binding_policy: "All implementation repositories must treat tenant identity as a required security, data, user, authentication, and operational boundary."
 
 authority:
   constitution: "specs/00-meta/specification-constitution.yaml"
@@ -14,33 +14,35 @@ authority:
 
 core_model:
   tenant:
-    definition: "A tenant represents one business customer account using IoTable."
+    definition: "A tenant represents one isolated business location using IoTable."
     requirement_id: "01-domain.tenant.REQ-001"
     required: true
-    business_scope: "single_business"
+    business_scope: "single_business_location"
     owns:
-      - "venues"
+      - "areas"
+      - "tables"
       - "users"
-      - "roles"
+      - "staff_accounts"
       - "menus"
       - "orders"
       - "payments"
       - "operational_settings"
-    does_not_own:
-      - "platform_global_configuration"
-      - "platform_operator_accounts"
-  venue_relationship:
+      - "tenant_database_or_equivalent_isolated_data_store"
+    does_not_require:
+      - "venue_layer"
+      - "cross_tenant_membership"
+  area_relationship:
     requirement_id: "01-domain.tenant.REQ-002"
-    model: "tenant_has_many_venues"
-    tenant_may_have_zero_venues_during_setup: true
-    tenant_may_have_multiple_venues: true
-    venue_must_belong_to_exactly_one_tenant: true
+    model: "tenant_has_many_areas"
+    tenant_may_have_zero_areas_during_setup: true
+    tenant_may_have_multiple_areas: true
+    area_must_belong_to_exactly_one_tenant: true
   user_relationship:
     requirement_id: "01-domain.tenant.REQ-003"
-    model: "tenant_has_many_users_through_memberships"
-    user_identity_may_exist_outside_single_tenant: true
-    tenant_access_requires_membership: true
-    membership_defines_role_scope: true
+    model: "tenant_owns_isolated_users"
+    user_identity_is_tenant_scoped: true
+    user_identity_must_not_be_shared_across_tenants: true
+    cross_tenant_membership_forbidden: true
   tenant_identifier:
     requirement_id: "01-domain.tenant.REQ-004"
     required: true
@@ -53,124 +55,133 @@ isolation_policy:
   tenant_isolation_required:
     requirement_id: "01-domain.tenant.REQ-005"
     value: true
-    description: "Tenant-scoped data must not be readable, writable, queryable, or inferable by another tenant."
+    description: "Tenant-scoped data, users, credentials, sessions, settings, and operational records must be fully isolated from every other tenant."
   every_tenant_scoped_record_requires_tenant_id:
     requirement_id: "01-domain.tenant.REQ-006"
     value: true
-  cross_tenant_access:
+  database_isolation:
     requirement_id: "01-domain.tenant.REQ-007"
-    default: "forbidden"
-    allowed_only_for:
-      - "platform_operator_accounts_with_explicit_platform_scope"
-      - "internal_system_processes_with_audited_platform_scope"
-  query_filtering:
+    required: true
+    isolation_level: "tenant_database_or_equivalent_hard_isolation"
+    shared_cross_tenant_application_tables_for_tenant_data_forbidden: true
+  cross_tenant_access:
     requirement_id: "01-domain.tenant.REQ-008"
+    default: "forbidden"
+    tenant_user_cross_access_forbidden: true
+    allowed_only_for:
+      - "internal_platform_support_process_with_explicit_audit"
+  query_filtering:
+    requirement_id: "01-domain.tenant.REQ-009"
     tenant_scope_must_be_enforced_server_side: true
     client_supplied_tenant_scope_must_not_be_trusted_without_authorization: true
 
 lifecycle:
   tenant_statuses:
-    requirement_id: "01-domain.tenant.REQ-009"
+    requirement_id: "01-domain.tenant.REQ-010"
     allowed_values:
       - "setup"
       - "active"
       - "suspended"
       - "closed"
   creation:
-    requirement_id: "01-domain.tenant.REQ-010"
-    creates_initial_owner_membership: true
-    may_exist_without_venue_until_setup_completed: true
-  activation:
     requirement_id: "01-domain.tenant.REQ-011"
+    creates_initial_owner_user: true
+    creates_isolated_tenant_data_store: true
+    may_exist_without_areas_until_setup_completed: true
+  activation:
+    requirement_id: "01-domain.tenant.REQ-012"
     requires:
-      - "at_least_one_owner_membership"
+      - "exactly_one_owner_user"
       - "billing_or_subscription_state_when_billing_is_enabled"
   suspension:
-    requirement_id: "01-domain.tenant.REQ-012"
+    requirement_id: "01-domain.tenant.REQ-013"
     blocks_operational_write_actions: true
     allows_tenant_scoped_read_actions: true
     allows_owner_account_access: true
-    allows_platform_operator_access: true
+    allows_internal_platform_support_access_with_audit: true
     allows_admin_actions_required_to_restore_service: true
   closure:
-    requirement_id: "01-domain.tenant.REQ-013"
+    requirement_id: "01-domain.tenant.REQ-014"
     blocks_operational_access: true
     data_retention_policy_required: true
 
 roles_and_access_boundary:
-  tenant_membership:
-    requirement_id: "01-domain.tenant.REQ-014"
-    required_for_tenant_access: true
-    contains:
-      - "tenant_id"
-      - "user_id"
-      - "role_id"
-      - "membership_status"
-  platform_operator:
+  allowed_user_types:
     requirement_id: "01-domain.tenant.REQ-015"
-    exists: true
-    tenant_membership_required: false
-    platform_scope_required: true
-    all_tenant_access_must_be_audited: true
-  membership_statuses:
+    values:
+      - "owner"
+      - "staff"
+  owner:
     requirement_id: "01-domain.tenant.REQ-016"
-    allowed_values:
-      - "invited"
-      - "active"
-      - "disabled"
-      - "removed"
+    exactly_one_per_tenant: true
+    created_with_tenant: true
+    can_create_staff: true
+    max_owner_count: 1
+  staff:
+    requirement_id: "01-domain.tenant.REQ-017"
+    created_by_owner: true
+    max_active_staff_per_tenant: 30
+  forbidden_user_types:
+    requirement_id: "01-domain.tenant.REQ-018"
+    values:
+      - "tenant_admin"
+      - "manager"
+      - "cashier"
+      - "waiter"
+      - "shared_user"
+      - "cross_tenant_user"
+      - "platform_operator_as_tenant_user"
 
 data_policy:
   tenant_scoped_entities:
-    requirement_id: "01-domain.tenant.REQ-017"
+    requirement_id: "01-domain.tenant.REQ-019"
     examples:
-      - "venue"
       - "area"
       - "table"
+      - "owner_user"
+      - "staff_user"
       - "menu"
       - "menu_item"
       - "order"
       - "payment"
       - "shift"
-      - "staff_membership"
   platform_scoped_entities:
-    requirement_id: "01-domain.tenant.REQ-018"
+    requirement_id: "01-domain.tenant.REQ-020"
     examples:
-      - "platform_operator_account"
-      - "global_feature_flag"
-      - "platform_audit_event"
+      - "platform_support_audit_event"
+      - "global_platform_configuration"
   tenant_data_export:
-    requirement_id: "01-domain.tenant.REQ-019"
+    requirement_id: "01-domain.tenant.REQ-021"
     required: true
     scope: "single_tenant"
   tenant_data_deletion:
-    requirement_id: "01-domain.tenant.REQ-020"
+    requirement_id: "01-domain.tenant.REQ-022"
     policy_required_before_production: true
 
 api_policy:
   tenant_context_required:
-    requirement_id: "01-domain.tenant.REQ-021"
+    requirement_id: "01-domain.tenant.REQ-023"
     value: true
     applies_to:
       - "tenant_scoped_read_operations"
       - "tenant_scoped_write_operations"
   tenant_context_sources:
-    requirement_id: "01-domain.tenant.REQ-022"
+    requirement_id: "01-domain.tenant.REQ-024"
     allowed_sources:
-      - "authenticated_membership"
-      - "explicit_route_parameter_authorized_server_side"
-      - "platform_operator_scope"
+      - "authenticated_tenant_user"
+      - "internal_platform_support_scope_with_audit"
   tenant_context_must_be_auditable:
-    requirement_id: "01-domain.tenant.REQ-023"
+    requirement_id: "01-domain.tenant.REQ-025"
     value: true
 
 traceability:
   source_type: "owner_and_system_design"
   source_reference:
-    - "DEC-2026-002"
     - "DEC-2026-005"
     - "DEC-2026-006"
     - "DEC-2026-007"
+    - "DEC-2026-008"
+    - "DEC-2026-009"
     - "specs/00-meta/specification-constitution.yaml"
     - "specs/00-meta/documentation-index.yaml"
 
@@ -183,7 +194,6 @@ owner_decisions:
     owner: "product_owner"
     affected_requirements:
       - "01-domain.tenant.REQ-001"
-      - "01-domain.tenant.REQ-002"
   - id: "DEC-2026-006"
     status: "accepted"
     decision: "Tenant identifiers use ULID format."
@@ -194,11 +204,33 @@ owner_decisions:
       - "01-domain.tenant.REQ-004"
   - id: "DEC-2026-007"
     status: "accepted"
-    decision: "Suspended tenants allow read access, owner account access, platform operator access, and administrative actions required to restore service while blocking operational write actions."
-    rationale: "Suspension stops operations without preventing account recovery or platform support."
+    decision: "Suspended tenants allow read access, owner account access, platform support access with audit, and administrative actions required to restore service while blocking operational write actions."
+    rationale: "Suspension stops operations without preventing account recovery or support."
     date: "2026-05-03"
     owner: "product_owner"
     affected_requirements:
-      - "01-domain.tenant.REQ-012"
+      - "01-domain.tenant.REQ-013"
+  - id: "DEC-2026-008"
+    status: "accepted"
+    decision: "IoTable does not use a separate venue layer. A tenant directly represents the business location and owns areas and tables."
+    rationale: "The product model stays simple and aligns the operational hierarchy with tenant isolation."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_requirements:
+      - "01-domain.tenant.REQ-001"
+      - "01-domain.tenant.REQ-002"
+  - id: "DEC-2026-009"
+    status: "accepted"
+    decision: "Tenants are fully isolated from each other across users, credentials, sessions, data, and data stores. Each tenant has exactly one owner and up to thirty staff users created by the owner. No other tenant user types exist."
+    rationale: "Strict isolation simplifies security and product behavior for the initial IoTable system."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_requirements:
+      - "01-domain.tenant.REQ-003"
+      - "01-domain.tenant.REQ-007"
+      - "01-domain.tenant.REQ-015"
+      - "01-domain.tenant.REQ-016"
+      - "01-domain.tenant.REQ-017"
+      - "01-domain.tenant.REQ-018"
 
 open_decisions: []
