@@ -1,0 +1,47 @@
+id: "04-implementation.repository-contract"
+title: "Repository Contract"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define how implementation repositories consume the IoTable specification repository."
+  binding_policy: "Implementation repositories must treat this repository as the source of truth for product behavior and system requirements."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  documentation_index: "specs/00-meta/documentation-index.yaml"
+  llm_execution_policy: "specs/00-meta/llm-execution-policy.yaml"
+  decision_records: "specs/00-meta/decision-records.yaml"
+
+spec_reference:
+  requirement_id: "04-implementation.repository-contract.REQ-001"
+  specification_repository: "iotablesoftware-tech/iotablesoftware"
+  canonical_branch: "main"
+  implementation_must_reference_spec_commit_sha: true
+  required_file: "SPECIFICATION.md"
+
+source_of_truth:
+  requirement_id: "04-implementation.repository-contract.REQ-002"
+  implementation_code_must_not_define_product_behavior_without_spec: true
+  product_behavior_must_trace_to_spec_requirement: true
+  missing_required_behavior_requires_blocker: true
+
+verification:
+  requirement_id: "04-implementation.repository-contract.REQ-003"
+  implementation_repository_must_define_verification_commands: true
+  tests_must_map_to_spec_requirements: true
+  required_test_categories:
+    - "unit_tests"
+    - "integration_tests"
+    - "api_contract_tests"
+    - "tenant_isolation_tests"
+    - "security_tests"
+    - "customer_qr_access_tests"
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/00-meta/specification-constitution.yaml"
+    - "specs/00-meta/llm-execution-policy.yaml"
+
+open_decisions: []
