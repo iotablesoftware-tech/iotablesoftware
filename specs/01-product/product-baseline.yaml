@@ -1,0 +1,114 @@
+id: "01-product.product-baseline"
+title: "Product Baseline"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define the final-state product baseline for IoTable across tenant scope, users, operational surfaces, and core restaurant workflows."
+  binding_policy: "All domain, capability, technical, and implementation specifications must remain consistent with this product baseline."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  area_and_table_domain: "specs/01-domain/area-and-table.yaml"
+  user_and_access_domain: "specs/01-domain/user-and-access.yaml"
+
+product_identity:
+  requirement_id: "01-product.baseline.REQ-001"
+  name: "IoTable"
+  type: "tenant-isolated cafe and restaurant operations platform"
+  primary_users:
+    - "owner"
+    - "staff"
+  primary_operational_context: "single business location per tenant"
+
+product_scope:
+  requirement_id: "01-product.baseline.REQ-002"
+  included_capabilities:
+    - "tenant setup and isolation"
+    - "area and table management"
+    - "owner and staff access"
+    - "menu catalog management"
+    - "table sessions"
+    - "independent submitted orders"
+    - "split payments"
+    - "manual table session closing"
+    - "tenant-scoped realtime operational events"
+  excluded_capabilities:
+    - "venue layer"
+    - "cross-tenant users"
+    - "custom role catalog"
+    - "inventory automation"
+    - "price history"
+    - "tips"
+    - "overpayments"
+    - "tenant-per-container deployment requirement"
+    - "kubernetes requirement"
+
+tenant_baseline:
+  requirement_id: "01-product.baseline.REQ-003"
+  tenant_represents: "one isolated business location"
+  tenant_owns:
+    - "areas"
+    - "tables"
+    - "users"
+    - "menu"
+    - "orders"
+    - "payments"
+    - "tenant_database"
+  isolation_model: "database_per_tenant"
+
+user_baseline:
+  requirement_id: "01-product.baseline.REQ-004"
+  allowed_user_types:
+    - "owner"
+    - "staff"
+  owner_count_per_tenant: 1
+  max_active_staff_per_tenant: 30
+  login_context_source: "tenant_subdomain"
+
+operational_model:
+  requirement_id: "01-product.baseline.REQ-005"
+  hierarchy: "tenant -> area -> table -> table_session -> orders -> order_items"
+  table_session_created_automatically_with_first_order: true
+  table_session_may_contain_multiple_orders: true
+  submitted_orders_are_immutable_work_units: true
+  additional_items_after_submission_create_new_order: true
+
+catalog_model:
+  requirement_id: "01-product.baseline.REQ-006"
+  tenant_owns_menu_catalog: true
+  menu_items_may_have_variants: true
+  variant_contains_current_price: true
+  price_history_tracked: false
+  stock_tracking_enabled: false
+  availability_managed_manually_by_owner: true
+
+payment_model:
+  requirement_id: "01-product.baseline.REQ-007"
+  payment_entity_required: true
+  split_payment_supported: true
+  tips_supported: false
+  overpayments_supported: false
+  table_session_close_is_manual: true
+
+technical_baseline:
+  requirement_id: "01-product.baseline.REQ-008"
+  api_style: "rest"
+  authentication: "tenant_scoped_jwt"
+  database_engine: "postgresql"
+  identifier_format: "ulid"
+  realtime_events_enabled: true
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/01-domain/tenant.yaml"
+    - "specs/01-domain/area-and-table.yaml"
+    - "specs/01-domain/user-and-access.yaml"
+    - "specs/02-capabilities/table-service.yaml"
+    - "specs/02-capabilities/order-management.yaml"
+    - "specs/02-capabilities/menu-catalog.yaml"
+    - "specs/02-capabilities/payment-and-closing.yaml"
+
+open_decisions: []
