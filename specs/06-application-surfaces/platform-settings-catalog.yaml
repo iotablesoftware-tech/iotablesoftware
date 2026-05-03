@@ -1,0 +1,16 @@
+id: "06-application-surfaces.platform-settings-catalog"
+title: "Platform Settings Catalog"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define minimal platform-level configuration settings."
+
+settings:
+  requirement_id: "06-application-surfaces.settings.REQ-001"
+  includes:
+    - "platform_domain"
+    - "jwt_configuration"
+    - "database_connection_templates"
+
+open_decisions: []
