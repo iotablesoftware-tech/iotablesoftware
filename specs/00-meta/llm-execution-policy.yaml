@@ -1,0 +1,166 @@
+id: "00-meta.llm-execution-policy"
+title: "LLM Execution Policy"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define mandatory execution behavior for LLM coding agents, assisted specification authors, and downstream implementation workflows consuming the IoTable specification."
+  binding_policy: "LLM agents must follow this policy before, during, and after every specification or implementation task."
+
+authority:
+  highest_authority: "specs/00-meta/specification-constitution.yaml"
+  navigation_authority: "specs/00-meta/documentation-index.yaml"
+  execution_authority: "specs/00-meta/llm-execution-policy.yaml"
+
+mandatory_read_sequence:
+  for_every_task:
+    - "specs/00-meta/specification-constitution.yaml"
+    - "specs/00-meta/documentation-index.yaml"
+    - "specs/00-meta/llm-execution-policy.yaml"
+  additional_reads:
+    specification_authoring:
+      - "specs/00-meta/decision-records.yaml"
+      - "relevant_domain_documents"
+      - "relevant_capability_documents"
+      - "matching_schema_documents"
+    implementation_authoring:
+      - "relevant_domain_documents"
+      - "relevant_capability_documents"
+      - "relevant_technical_documents"
+      - "specs/04-implementation/repository-contract.yaml"
+
+execution_modes:
+  specification_authoring:
+    description: "Author or revise specification documents as current final-state truth."
+    allowed_outputs:
+      - "yaml_specification_documents"
+      - "json_schema_documents"
+      - "decision_records"
+      - "blocker_reports"
+  implementation_authoring:
+    description: "Author downstream implementation code only from accepted specification requirements."
+    allowed_outputs:
+      - "implementation_code"
+      - "tests"
+      - "repository_documentation"
+      - "blocker_reports"
+  analysis_only:
+    description: "Analyze existing specification or implementation state without changing files."
+    allowed_outputs:
+      - "findings"
+      - "blocker_reports"
+      - "recommended_owner_decisions"
+
+pre_task_protocol:
+  required_steps:
+    - "identify_task_type"
+    - "load_mandatory_meta_documents"
+    - "load_relevant_domain_capability_and_technical_documents"
+    - "identify_missing_required_documents"
+    - "identify_open_decisions_that_affect_the_task"
+    - "determine_whether_owner_decision_is_required"
+  owner_decision_required_when:
+    - "required_behavior_is_missing"
+    - "documents_conflict_at_same_authority_level"
+    - "business_rule_has_multiple_valid_interpretations"
+    - "security_or_tenant_isolation_boundary_is_unclear"
+    - "implementation_repository_boundary_is_unclear"
+    - "agent_would_need_to_invent_product_behavior"
+
+in_task_protocol:
+  required_behavior:
+    - "follow_source_of_truth_hierarchy"
+    - "preserve_final_state_authoring_style"
+    - "use_explicit_requirement_ids_when_authoring_requirements"
+    - "maintain_yaml_schema_parity"
+    - "write_blocker_instead_of_guessing"
+    - "keep_product_behavior_out_of_implementation_when_not_specified"
+  forbidden_behavior:
+    - "invent_product_behavior"
+    - "skip_meta_documents"
+    - "write_historical_change_language"
+    - "write_migration_language"
+    - "write_legacy_or_deprecation_language_before_implementation_policy_exists"
+    - "treat_code_as_higher_authority_than_specification"
+    - "create_untracked_assumptions"
+
+final_state_language_policy:
+  required: true
+  documents_must_read_as_current_truth: true
+  forbidden_patterns:
+    - "previously"
+    - "formerly"
+    - "changed from"
+    - "changed to"
+    - "new behavior"
+    - "old behavior"
+    - "migration"
+    - "migrated"
+    - "legacy"
+    - "deprecated"
+    - "backward compatible"
+  allowed_patterns:
+    - "The system must"
+    - "The platform supports"
+    - "The API exposes"
+    - "The repository contains"
+    - "The service enforces"
+
+blocker_protocol:
+  blocker_required_when:
+    - "mandatory_document_missing"
+    - "required_schema_missing"
+    - "required_behavior_missing"
+    - "same_authority_conflict_detected"
+    - "tenant_isolation_impact_unclear"
+    - "security_requirement_unclear"
+    - "owner_decision_required"
+  blocker_output_fields:
+    - "blocker_id"
+    - "task"
+    - "missing_or_conflicting_requirement"
+    - "affected_documents"
+    - "owner_decision_needed"
+    - "safe_next_step"
+  blocker_id_format: "BLK-YYYY-NNN"
+
+assumption_policy:
+  assumptions_about_product_behavior_allowed: false
+  implementation_assumptions_allowed_only_when:
+    - "they_do_not_change_product_behavior"
+    - "they_are_local_to_tooling_or_file_layout"
+    - "they_are_explicitly_reported_after_task"
+  assumptions_must_not_be_persisted_as_spec_truth_without_owner_decision: true
+
+post_task_protocol:
+  required_report_fields:
+    - "changed_files"
+    - "owner_decisions_applied"
+    - "verification_commands"
+    - "unresolved_blockers"
+    - "assumptions"
+  verification_required_when_files_change: true
+  verification_commands_must_be_specific: true
+
+implementation_repository_behavior:
+  specification_commit_reference_required: true
+  required_file: "SPECIFICATION.md"
+  implementation_repo_must_not_define_product_behavior_without_spec: true
+  implementation_repo_must_emit_blocker_when_spec_is_missing_required_behavior: true
+  implementation_tests_must_map_to_spec_requirements: true
+
+schema_behavior:
+  every_yaml_spec_requires_matching_schema: true
+  schema_must_validate_required_fields: true
+  schema_must_reject_unknown_structural_fields_when_possible: true
+  schema_must_allow_domain_extension_only_when_explicitly_defined: true
+
+open_decisions:
+  - id: "OD-2026-002"
+    status: "open"
+    question: "Which verification command is canonical before package tooling is fully imported into the specification repository?"
+    owner: "product_owner"
+    affected_documents:
+      - "specs/00-meta/llm-execution-policy.yaml"
+      - "package.json"
+      - "tools/validate-specs.ts"
