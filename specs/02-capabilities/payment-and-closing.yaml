@@ -1,0 +1,164 @@
+id: "02-capabilities.payment-and-closing"
+title: "Payment and Closing Capability"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define payment recording, split payment behavior, bill settlement, receipt scope, and table session closing for IoTable."
+  binding_policy: "Payments and closing operations must be tenant-scoped, table-session-aware, and independent from individual order submission."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  table_service: "specs/02-capabilities/table-service.yaml"
+  order_management: "specs/02-capabilities/order-management.yaml"
+  menu_catalog: "specs/02-capabilities/menu-catalog.yaml"
+
+payment_model:
+  payment:
+    requirement_id: "02-capabilities.payment.REQ-001"
+    definition: "A payment represents a recorded settlement action against one table session, one order, or selected payable items."
+    required_fields:
+      - "id"
+      - "tenant_id"
+      - "table_session_id"
+      - "amount"
+      - "method"
+      - "status"
+      - "created_by_user_id"
+  payment_scope:
+    requirement_id: "02-capabilities.payment.REQ-002"
+    allowed_values:
+      - "table_session"
+      - "order"
+      - "selected_items"
+  payment_status:
+    requirement_id: "02-capabilities.payment.REQ-003"
+    allowed_values:
+      - "recorded"
+      - "voided"
+
+payment_methods:
+  requirement_id: "02-capabilities.payment.REQ-004"
+  allowed_values:
+    - "cash"
+    - "card"
+    - "other"
+  external_payment_processor_required: false
+
+split_payment_policy:
+  enabled:
+    requirement_id: "02-capabilities.payment.REQ-005"
+    value: true
+  split_by:
+    requirement_id: "02-capabilities.payment.REQ-006"
+    allowed_values:
+      - "amount"
+      - "order"
+      - "selected_items"
+  settlement_rules:
+    requirement_id: "02-capabilities.payment.REQ-007"
+    total_recorded_payment_must_not_exceed_payable_total_unless_tip_or_overpayment_policy_exists: true
+    same_order_may_receive_multiple_payments: true
+    same_table_session_may_receive_multiple_payments: true
+
+payable_amount_policy:
+  order_item_price_source:
+    requirement_id: "02-capabilities.payment.REQ-008"
+    uses_order_item_snapshot_price: true
+    catalog_price_changes_do_not_affect_existing_payables: true
+  table_session_total:
+    requirement_id: "02-capabilities.payment.REQ-009"
+    calculated_from_orders_in_session: true
+    includes_completed_and_submitted_orders: true
+    excludes_cancelled_items: true
+  unpaid_balance:
+    requirement_id: "02-capabilities.payment.REQ-010"
+    calculated_as_payable_total_minus_recorded_non_voided_payments: true
+
+closing_policy:
+  manual_session_close:
+    requirement_id: "02-capabilities.payment.REQ-011"
+    required: true
+    table_session_does_not_close_automatically_when_paid: true
+    explicit_owner_or_staff_action_required: true
+  close_session_requirements:
+    requirement_id: "02-capabilities.payment.REQ-012"
+    requires_no_unpaid_balance: true
+    requires_no_open_orders: true
+    requires_no_submitted_unserved_items: true
+  after_close:
+    requirement_id: "02-capabilities.payment.REQ-013"
+    table_session_becomes_closed: true
+    new_orders_require_new_table_session: true
+    table_may_be_marked_available_by_same_action: true
+
+receipt_policy:
+  receipt:
+    requirement_id: "02-capabilities.payment.REQ-014"
+    supported: true
+    receipt_scope_allowed_values:
+      - "payment"
+      - "order"
+      - "table_session"
+  receipt_contents:
+    requirement_id: "02-capabilities.payment.REQ-015"
+    must_include:
+      - "tenant_id"
+      - "table_session_id"
+      - "payment_ids_when_payment_scoped"
+      - "order_item_snapshots"
+      - "total_amount"
+      - "payment_method_summary"
+
+access_policy:
+  requirement_id: "02-capabilities.payment.REQ-016"
+  owner_can_record_payments: true
+  staff_can_record_payments: true
+  owner_can_close_table_session: true
+  staff_can_close_table_session: true
+  operations_must_be_tenant_scoped: true
+
+void_policy:
+  requirement_id: "02-capabilities.payment.REQ-017"
+  recorded_payment_can_be_voided: true
+  void_requires_owner_or_staff: true
+  void_must_emit_audit_event: true
+  void_does_not_delete_payment_record: true
+
+realtime_policy:
+  requirement_id: "02-capabilities.payment.REQ-018"
+  payment_changes_emit_event: true
+  balance_changes_emit_event: true
+  table_session_close_emits_event: true
+  event_scope: "tenant"
+
+traceability:
+  source_type: "owner_decision"
+  source_reference:
+    - "DEC-2026-016"
+    - "specs/02-capabilities/table-service.yaml"
+    - "specs/02-capabilities/order-management.yaml"
+    - "specs/02-capabilities/menu-catalog.yaml"
+
+owner_decisions:
+  - id: "DEC-2026-016"
+    status: "accepted"
+    decision: "Payment is represented as a dedicated entity. Split payments are supported. Table session closing is manual and requires an explicit owner or staff action."
+    rationale: "Payment and session closing remain auditable, flexible, and aligned with independent orders inside a table session."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_requirements:
+      - "02-capabilities.payment.REQ-001"
+      - "02-capabilities.payment.REQ-005"
+      - "02-capabilities.payment.REQ-011"
+      - "02-capabilities.payment.REQ-012"
+
+open_decisions:
+  - id: "OD-2026-008"
+    status: "open"
+    question: "Are tips or overpayments supported in the initial payment model?"
+    owner: "product_owner"
+    affected_requirements:
+      - "02-capabilities.payment.REQ-007"
+      - "02-capabilities.payment.REQ-010"
