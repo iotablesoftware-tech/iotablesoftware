@@ -1,0 +1,23 @@
+id: "08-data-contracts.platform-data"
+title: "Platform Data"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define platform registry data constraints."
+
+contract:
+  requirement_id: "08-data.platform.REQ-001"
+  platform_registry_contains_only:
+    - "tenant_id"
+    - "tenant_subdomain"
+    - "tenant_status"
+    - "database_connection_reference"
+  tenant_operational_data_forbidden_in_platform_registry: true
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/03-technical/data-model.yaml"
+
+open_decisions: []
