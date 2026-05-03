@@ -1,0 +1,70 @@
+id: "02-capabilities.customer-table-access"
+title: "Customer Table Access"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define optional customer-facing table access through QR join, browser access ticket, and server-side cart behavior."
+  binding_policy: "Customer access must remain tenant-scoped and table-session-bound. Customer access does not create tenant users."
+
+authority:
+  table_service: "specs/02-capabilities/table-service.yaml"
+  order_management: "specs/02-capabilities/order-management.yaml"
+  security: "specs/03-technical/security.yaml"
+
+support_policy:
+  requirement_id: "02-capabilities.customer-access.REQ-001"
+  customer_qr_access_supported: true
+  customer_access_is_not_tenant_user: true
+  customer_access_is_table_session_scoped: true
+
+qr_token_policy:
+  requirement_id: "02-capabilities.customer-access.REQ-002"
+  qr_token_required_for_customer_join: true
+  qr_token_short_lived: true
+  qr_token_single_use: true
+  consumed_qr_token_must_not_be_reused: true
+  qr_token_binds_to_table: true
+
+access_ticket_policy:
+  requirement_id: "02-capabilities.customer-access.REQ-003"
+  issued_after_successful_qr_join: true
+  browser_scoped: true
+  stored_in_http_only_cookie: true
+  invalid_when_table_session_closes: true
+  not_a_physical_device_identity: true
+
+cart_policy:
+  requirement_id: "02-capabilities.customer-access.REQ-004"
+  server_side_cart_required: true
+  cart_bound_to_access_ticket_and_table_session: true
+  cart_must_not_be_stored_in_local_storage: true
+  cart_must_not_be_stored_in_cookie_payload: true
+
+checkout_proof_policy:
+  requirement_id: "02-capabilities.customer-access.REQ-005"
+  fresh_qr_required_for_customer_order_submission: true
+  proof_consumed_after_successful_submit: true
+  later_customer_order_submission_requires_new_fresh_qr: true
+
+ordering_integration:
+  requirement_id: "02-capabilities.customer-access.REQ-006"
+  customer_submitted_order_creates_independent_order: true
+  submitted_order_is_immutable: true
+  customer_access_must_not_bypass_menu_availability: true
+
+traceability:
+  source_type: "imported_reference_adapted"
+  source_reference:
+    - "tabflow/docs/explanation/concepts/customer-session-model.md"
+    - "specs/02-capabilities/table-service.yaml"
+    - "specs/02-capabilities/order-management.yaml"
+
+open_decisions:
+  - id: "OD-2026-010"
+    status: "open"
+    question: "Is customer QR ordering included in the first backend implementation, or kept as a post-core extension?"
+    owner: "product_owner"
+    affected_documents:
+      - "specs/02-capabilities/customer-table-access.yaml"
+      - "specs/04-implementation/backend-service-contract.yaml"
