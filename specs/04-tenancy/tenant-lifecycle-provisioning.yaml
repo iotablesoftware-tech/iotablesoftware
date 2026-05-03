@@ -1,0 +1,48 @@
+id: "04-tenancy.tenant-lifecycle-provisioning"
+title: "Tenant Lifecycle Provisioning"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define tenant provisioning, activation, suspension, closure, and tenant database creation behavior."
+  binding_policy: "Tenant provisioning must create an isolated tenant database and exactly one owner user."
+
+authority:
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  user_and_access: "specs/01-domain/user-and-access.yaml"
+  data_model: "specs/03-technical/data-model.yaml"
+
+provisioning_flow:
+  requirement_id: "04-tenancy.lifecycle.REQ-001"
+  steps:
+    - "create_tenant_registry_record"
+    - "create_tenant_database"
+    - "run_tenant_database_schema_initialization"
+    - "create_owner_user_in_tenant_database"
+    - "set_tenant_status_setup"
+
+activation_flow:
+  requirement_id: "04-tenancy.lifecycle.REQ-002"
+  requires:
+    - "tenant_database_exists"
+    - "exactly_one_owner_user_exists"
+  sets_status: "active"
+
+suspension_flow:
+  requirement_id: "04-tenancy.lifecycle.REQ-003"
+  sets_status: "suspended"
+  blocks_operational_writes: true
+  allows_owner_read_access: true
+
+closure_flow:
+  requirement_id: "04-tenancy.lifecycle.REQ-004"
+  sets_status: "closed"
+  blocks_operational_access: true
+  tenant_data_retention_policy_required_before_production: true
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/01-domain/tenant.yaml"
+
+open_decisions: []
