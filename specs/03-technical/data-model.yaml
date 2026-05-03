@@ -1,0 +1,207 @@
+id: "03-technical.data-model"
+title: "Data Model"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define canonical persistence technology, identifier generation, tenant database isolation, entity relationships, constraints, and data integrity rules for IoTable."
+  binding_policy: "All implementation repositories must map persistent data to this model unless a higher-authority specification explicitly narrows behavior."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  area_and_table_domain: "specs/01-domain/area-and-table.yaml"
+  user_and_access: "specs/01-domain/user-and-access.yaml"
+  api_contracts: "specs/03-technical/api-contracts.yaml"
+
+persistence_technology:
+  database:
+    requirement_id: "03-technical.data-model.REQ-001"
+    engine: "postgresql"
+    nosql_primary_store_supported: false
+  tenant_database_strategy:
+    requirement_id: "03-technical.data-model.REQ-002"
+    strategy: "database_per_tenant"
+    initial_deployment: "shared_postgresql_server_with_separate_tenant_databases"
+    tenant_database_portability_required: true
+    tenant_dedicated_database_server_allowed: true
+    tenant_dedicated_database_container_required: false
+
+identifier_policy:
+  requirement_id: "03-technical.data-model.REQ-003"
+  generation_location: "application"
+  canonical_format: "ulid"
+  database_generated_primary_ids_allowed: false
+  ids_must_be_immutable: true
+
+platform_registry:
+  requirement_id: "03-technical.data-model.REQ-004"
+  required: true
+  contains_only_platform_routing_metadata: true
+  must_not_store_tenant_operational_data: true
+  entities:
+    tenant_registry:
+      fields:
+        - "tenant_id"
+        - "tenant_subdomain"
+        - "tenant_status"
+        - "database_connection_reference"
+
+canonical_tenant_entities:
+  users:
+    requirement_id: "03-technical.data-model.REQ-005"
+    table: "users"
+    belongs_to_tenant_database: true
+    fields:
+      - "id"
+      - "user_type"
+      - "email"
+      - "password_hash"
+      - "status"
+      - "created_at"
+      - "updated_at"
+    constraints:
+      - "exactly_one_owner_user_per_tenant_database"
+      - "max_30_active_staff_users_per_tenant_database"
+  areas:
+    requirement_id: "03-technical.data-model.REQ-006"
+    table: "areas"
+    fields:
+      - "id"
+      - "name"
+      - "status"
+      - "sort_order"
+  tables:
+    requirement_id: "03-technical.data-model.REQ-007"
+    table: "tables"
+    fields:
+      - "id"
+      - "area_id"
+      - "display_name"
+      - "canonical_key"
+      - "status"
+      - "capacity"
+  menu_categories:
+    requirement_id: "03-technical.data-model.REQ-008"
+    table: "menu_categories"
+    fields:
+      - "id"
+      - "name"
+      - "sort_order"
+      - "availability_status"
+  menu_items:
+    requirement_id: "03-technical.data-model.REQ-009"
+    table: "menu_items"
+    fields:
+      - "id"
+      - "category_id"
+      - "name"
+      - "description"
+      - "availability_status"
+      - "sort_order"
+  menu_item_variants:
+    requirement_id: "03-technical.data-model.REQ-010"
+    table: "menu_item_variants"
+    fields:
+      - "id"
+      - "menu_item_id"
+      - "name"
+      - "price"
+      - "availability_status"
+  table_sessions:
+    requirement_id: "03-technical.data-model.REQ-011"
+    table: "table_sessions"
+    fields:
+      - "id"
+      - "table_id"
+      - "status"
+      - "opened_at"
+      - "closed_at"
+  orders:
+    requirement_id: "03-technical.data-model.REQ-012"
+    table: "orders"
+    fields:
+      - "id"
+      - "table_id"
+      - "table_session_id"
+      - "status"
+      - "created_by_user_id"
+      - "submitted_at"
+      - "completed_at"
+  order_items:
+    requirement_id: "03-technical.data-model.REQ-013"
+    table: "order_items"
+    fields:
+      - "id"
+      - "order_id"
+      - "menu_item_id"
+      - "menu_item_name_snapshot"
+      - "variant_id"
+      - "variant_name_snapshot"
+      - "unit_price_snapshot"
+      - "quantity"
+      - "status"
+  payments:
+    requirement_id: "03-technical.data-model.REQ-014"
+    table: "payments"
+    fields:
+      - "id"
+      - "table_session_id"
+      - "scope"
+      - "amount"
+      - "method"
+      - "status"
+      - "created_by_user_id"
+      - "created_at"
+  audit_events:
+    requirement_id: "03-technical.data-model.REQ-015"
+    table: "audit_events"
+    required: true
+    fields:
+      - "id"
+      - "actor_user_id"
+      - "event_type"
+      - "entity_type"
+      - "entity_id"
+      - "occurred_at"
+      - "metadata"
+
+relationship_rules:
+  requirement_id: "03-technical.data-model.REQ-016"
+  rules:
+    - "areas_have_many_tables"
+    - "tables_have_many_table_sessions"
+    - "table_sessions_have_many_orders"
+    - "table_sessions_have_many_payments"
+    - "orders_have_many_order_items"
+    - "menu_items_have_many_variants"
+    - "order_items_snapshot_catalog_fields"
+
+constraint_policy:
+  requirement_id: "03-technical.data-model.REQ-017"
+  monetary_values_must_use_decimal_not_float: true
+  submitted_orders_are_immutable_except_status_progression: true
+  payment_amount_must_not_make_balance_negative: true
+  closed_table_sessions_must_not_accept_new_orders: true
+  out_of_service_tables_must_not_accept_orders: true
+
+traceability:
+  source_type: "owner_decision"
+  source_reference:
+    - "DEC-2026-019"
+    - "specs/01-domain/tenant.yaml"
+    - "specs/02-capabilities/order-management.yaml"
+    - "specs/02-capabilities/payment-and-closing.yaml"
+
+owner_decisions:
+  - id: "DEC-2026-019"
+    status: "accepted"
+    decision: "IoTable uses PostgreSQL as the canonical database engine and application-generated ULIDs as canonical identifiers."
+    rationale: "PostgreSQL fits the relational order, payment, and tenant database model, while application-generated ULIDs keep identifiers portable and consistent across tenant databases."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_requirements:
+      - "03-technical.data-model.REQ-001"
+      - "03-technical.data-model.REQ-003"
+
+open_decisions: []
