@@ -1,0 +1,190 @@
+id: "01-domain.tenant"
+title: "Tenant Domain"
+status: "draft"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define the tenant model, tenant isolation boundary, ownership scope, and tenant lifecycle for IoTable."
+  binding_policy: "All implementation repositories must treat tenant identity as a required security, data, and operational boundary."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  documentation_index: "specs/00-meta/documentation-index.yaml"
+  llm_execution_policy: "specs/00-meta/llm-execution-policy.yaml"
+
+core_model:
+  tenant:
+    definition: "A tenant represents one business customer account using IoTable."
+    requirement_id: "01-domain.tenant.REQ-001"
+    required: true
+    owns:
+      - "venues"
+      - "users"
+      - "roles"
+      - "menus"
+      - "orders"
+      - "payments"
+      - "operational_settings"
+    does_not_own:
+      - "platform_global_configuration"
+      - "platform_operator_accounts"
+  venue_relationship:
+    requirement_id: "01-domain.tenant.REQ-002"
+    model: "tenant_has_many_venues"
+    tenant_may_have_zero_venues_during_setup: true
+    tenant_may_have_multiple_venues: true
+    venue_must_belong_to_exactly_one_tenant: true
+  user_relationship:
+    requirement_id: "01-domain.tenant.REQ-003"
+    model: "tenant_has_many_users_through_memberships"
+    user_identity_may_exist_outside_single_tenant: true
+    tenant_access_requires_membership: true
+    membership_defines_role_scope: true
+  tenant_identifier:
+    requirement_id: "01-domain.tenant.REQ-004"
+    required: true
+    immutable: true
+    globally_unique: true
+    exposed_to_clients: true
+    recommended_format: "opaque_uuid_or_ulid"
+
+isolation_policy:
+  tenant_isolation_required:
+    requirement_id: "01-domain.tenant.REQ-005"
+    value: true
+    description: "Tenant-scoped data must not be readable, writable, queryable, or inferable by another tenant."
+  every_tenant_scoped_record_requires_tenant_id:
+    requirement_id: "01-domain.tenant.REQ-006"
+    value: true
+  cross_tenant_access:
+    requirement_id: "01-domain.tenant.REQ-007"
+    default: "forbidden"
+    allowed_only_for:
+      - "platform_operator_accounts_with_explicit_platform_scope"
+      - "internal_system_processes_with_audited_platform_scope"
+  query_filtering:
+    requirement_id: "01-domain.tenant.REQ-008"
+    tenant_scope_must_be_enforced_server_side: true
+    client_supplied_tenant_scope_must_not_be_trusted_without_authorization: true
+
+lifecycle:
+  tenant_statuses:
+    requirement_id: "01-domain.tenant.REQ-009"
+    allowed_values:
+      - "setup"
+      - "active"
+      - "suspended"
+      - "closed"
+  creation:
+    requirement_id: "01-domain.tenant.REQ-010"
+    creates_initial_owner_membership: true
+    may_exist_without_venue_until_setup_completed: true
+  activation:
+    requirement_id: "01-domain.tenant.REQ-011"
+    requires:
+      - "at_least_one_owner_membership"
+      - "billing_or_subscription_state_when_billing_is_enabled"
+  suspension:
+    requirement_id: "01-domain.tenant.REQ-012"
+    blocks_operational_write_actions: true
+    allows_owner_account_access: true
+    allows_platform_operator_access: true
+  closure:
+    requirement_id: "01-domain.tenant.REQ-013"
+    blocks_operational_access: true
+    data_retention_policy_required: true
+
+roles_and_access_boundary:
+  tenant_membership:
+    requirement_id: "01-domain.tenant.REQ-014"
+    required_for_tenant_access: true
+    contains:
+      - "tenant_id"
+      - "user_id"
+      - "role_id"
+      - "membership_status"
+  platform_operator:
+    requirement_id: "01-domain.tenant.REQ-015"
+    exists: true
+    tenant_membership_required: false
+    platform_scope_required: true
+    all_tenant_access_must_be_audited: true
+  membership_statuses:
+    requirement_id: "01-domain.tenant.REQ-016"
+    allowed_values:
+      - "invited"
+      - "active"
+      - "disabled"
+      - "removed"
+
+data_policy:
+  tenant_scoped_entities:
+    requirement_id: "01-domain.tenant.REQ-017"
+    examples:
+      - "venue"
+      - "area"
+      - "table"
+      - "menu"
+      - "menu_item"
+      - "order"
+      - "payment"
+      - "shift"
+      - "staff_membership"
+  platform_scoped_entities:
+    requirement_id: "01-domain.tenant.REQ-018"
+    examples:
+      - "platform_operator_account"
+      - "global_feature_flag"
+      - "platform_audit_event"
+  tenant_data_export:
+    requirement_id: "01-domain.tenant.REQ-019"
+    required: true
+    scope: "single_tenant"
+  tenant_data_deletion:
+    requirement_id: "01-domain.tenant.REQ-020"
+    policy_required_before_production: true
+
+api_policy:
+  tenant_context_required:
+    requirement_id: "01-domain.tenant.REQ-021"
+    value: true
+    applies_to:
+      - "tenant_scoped_read_operations"
+      - "tenant_scoped_write_operations"
+  tenant_context_sources:
+    requirement_id: "01-domain.tenant.REQ-022"
+    allowed_sources:
+      - "authenticated_membership"
+      - "explicit_route_parameter_authorized_server_side"
+      - "platform_operator_scope"
+  tenant_context_must_be_auditable:
+    requirement_id: "01-domain.tenant.REQ-023"
+    value: true
+
+traceability:
+  source_type: "owner_and_system_design"
+  source_reference:
+    - "DEC-2026-002"
+    - "specs/00-meta/specification-constitution.yaml"
+    - "specs/00-meta/documentation-index.yaml"
+
+open_decisions:
+  - id: "OD-2026-003"
+    status: "open"
+    question: "Does one tenant always represent one legal business entity, or can one tenant represent a reseller/group account containing multiple businesses?"
+    owner: "product_owner"
+    affected_requirements:
+      - "01-domain.tenant.REQ-001"
+      - "01-domain.tenant.REQ-002"
+  - id: "OD-2026-004"
+    status: "open"
+    question: "Which tenant identifier format is canonical: UUID, ULID, or another opaque identifier?"
+    owner: "product_owner"
+    affected_requirements:
+      - "01-domain.tenant.REQ-004"
+  - id: "OD-2026-005"
+    status: "open"
+    question: "Which operational actions remain available while a tenant is suspended?"
+    owner: "product_owner"
+    affected_requirements:
+      - "01-domain.tenant.REQ-012"
