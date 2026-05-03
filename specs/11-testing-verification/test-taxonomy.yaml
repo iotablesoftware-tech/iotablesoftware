@@ -1,0 +1,29 @@
+id: "11-testing-verification.test-taxonomy"
+title: "Test Taxonomy"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define test types and coverage expectations for IoTable implementation."
+  binding_policy: "All critical flows must be covered by appropriate test types."
+
+test_types:
+  requirement_id: "11-testing.taxonomy.REQ-001"
+  types:
+    - "unit_tests"
+    - "integration_tests"
+    - "api_contract_tests"
+    - "security_tests"
+    - "tenant_isolation_tests"
+    - "realtime_event_tests"
+
+coverage_rules:
+  requirement_id: "11-testing.taxonomy.REQ-002"
+  must_cover:
+    - "order_submission"
+    - "payment_recording"
+    - "session_closing"
+    - "tenant_resolution"
+    - "authentication"
+
+open_decisions: []
