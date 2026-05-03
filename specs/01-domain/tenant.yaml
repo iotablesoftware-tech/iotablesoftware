@@ -27,10 +27,12 @@ core_model:
       - "orders"
       - "payments"
       - "operational_settings"
-      - "tenant_database_or_equivalent_isolated_data_store"
+      - "tenant_database"
     does_not_require:
       - "venue_layer"
       - "cross_tenant_membership"
+      - "tenant_dedicated_database_container"
+      - "kubernetes"
   area_relationship:
     requirement_id: "01-domain.tenant.REQ-002"
     model: "tenant_has_many_areas"
@@ -62,67 +64,77 @@ isolation_policy:
   database_isolation:
     requirement_id: "01-domain.tenant.REQ-007"
     required: true
-    isolation_level: "tenant_database_or_equivalent_hard_isolation"
+    strategy: "database_per_tenant"
+    initial_deployment: "shared_database_server_with_separate_tenant_databases"
+    dedicated_database_server_allowed: true
+    tenant_database_must_be_portable: true
+    tenant_dedicated_database_container_required: false
     shared_cross_tenant_application_tables_for_tenant_data_forbidden: true
-  cross_tenant_access:
+  deployment_complexity_policy:
     requirement_id: "01-domain.tenant.REQ-008"
+    kubernetes_required: false
+    docker_required_for_production: false
+    docker_allowed_for_local_development: true
+    tenant_per_container_required: false
+  cross_tenant_access:
+    requirement_id: "01-domain.tenant.REQ-009"
     default: "forbidden"
     tenant_user_cross_access_forbidden: true
     allowed_only_for:
       - "internal_platform_support_process_with_explicit_audit"
   query_filtering:
-    requirement_id: "01-domain.tenant.REQ-009"
+    requirement_id: "01-domain.tenant.REQ-010"
     tenant_scope_must_be_enforced_server_side: true
     client_supplied_tenant_scope_must_not_be_trusted_without_authorization: true
 
 lifecycle:
   tenant_statuses:
-    requirement_id: "01-domain.tenant.REQ-010"
+    requirement_id: "01-domain.tenant.REQ-011"
     allowed_values:
       - "setup"
       - "active"
       - "suspended"
       - "closed"
   creation:
-    requirement_id: "01-domain.tenant.REQ-011"
+    requirement_id: "01-domain.tenant.REQ-012"
     creates_initial_owner_user: true
-    creates_isolated_tenant_data_store: true
+    creates_isolated_tenant_database: true
     may_exist_without_areas_until_setup_completed: true
   activation:
-    requirement_id: "01-domain.tenant.REQ-012"
+    requirement_id: "01-domain.tenant.REQ-013"
     requires:
       - "exactly_one_owner_user"
       - "billing_or_subscription_state_when_billing_is_enabled"
   suspension:
-    requirement_id: "01-domain.tenant.REQ-013"
+    requirement_id: "01-domain.tenant.REQ-014"
     blocks_operational_write_actions: true
     allows_tenant_scoped_read_actions: true
     allows_owner_account_access: true
     allows_internal_platform_support_access_with_audit: true
     allows_admin_actions_required_to_restore_service: true
   closure:
-    requirement_id: "01-domain.tenant.REQ-014"
+    requirement_id: "01-domain.tenant.REQ-015"
     blocks_operational_access: true
     data_retention_policy_required: true
 
 roles_and_access_boundary:
   allowed_user_types:
-    requirement_id: "01-domain.tenant.REQ-015"
+    requirement_id: "01-domain.tenant.REQ-016"
     values:
       - "owner"
       - "staff"
   owner:
-    requirement_id: "01-domain.tenant.REQ-016"
+    requirement_id: "01-domain.tenant.REQ-017"
     exactly_one_per_tenant: true
     created_with_tenant: true
     can_create_staff: true
     max_owner_count: 1
   staff:
-    requirement_id: "01-domain.tenant.REQ-017"
+    requirement_id: "01-domain.tenant.REQ-018"
     created_by_owner: true
     max_active_staff_per_tenant: 30
   forbidden_user_types:
-    requirement_id: "01-domain.tenant.REQ-018"
+    requirement_id: "01-domain.tenant.REQ-019"
     values:
       - "tenant_admin"
       - "manager"
@@ -134,7 +146,7 @@ roles_and_access_boundary:
 
 data_policy:
   tenant_scoped_entities:
-    requirement_id: "01-domain.tenant.REQ-019"
+    requirement_id: "01-domain.tenant.REQ-020"
     examples:
       - "area"
       - "table"
@@ -146,32 +158,34 @@ data_policy:
       - "payment"
       - "shift"
   platform_scoped_entities:
-    requirement_id: "01-domain.tenant.REQ-020"
+    requirement_id: "01-domain.tenant.REQ-021"
     examples:
+      - "tenant_registry"
+      - "tenant_database_connection_reference"
       - "platform_support_audit_event"
       - "global_platform_configuration"
   tenant_data_export:
-    requirement_id: "01-domain.tenant.REQ-021"
+    requirement_id: "01-domain.tenant.REQ-022"
     required: true
     scope: "single_tenant"
   tenant_data_deletion:
-    requirement_id: "01-domain.tenant.REQ-022"
+    requirement_id: "01-domain.tenant.REQ-023"
     policy_required_before_production: true
 
 api_policy:
   tenant_context_required:
-    requirement_id: "01-domain.tenant.REQ-023"
+    requirement_id: "01-domain.tenant.REQ-024"
     value: true
     applies_to:
       - "tenant_scoped_read_operations"
       - "tenant_scoped_write_operations"
   tenant_context_sources:
-    requirement_id: "01-domain.tenant.REQ-024"
+    requirement_id: "01-domain.tenant.REQ-025"
     allowed_sources:
       - "authenticated_tenant_user"
       - "internal_platform_support_scope_with_audit"
   tenant_context_must_be_auditable:
-    requirement_id: "01-domain.tenant.REQ-025"
+    requirement_id: "01-domain.tenant.REQ-026"
     value: true
 
 traceability:
@@ -182,6 +196,7 @@ traceability:
     - "DEC-2026-007"
     - "DEC-2026-008"
     - "DEC-2026-009"
+    - "DEC-2026-010"
     - "specs/00-meta/specification-constitution.yaml"
     - "specs/00-meta/documentation-index.yaml"
 
@@ -209,7 +224,7 @@ owner_decisions:
     date: "2026-05-03"
     owner: "product_owner"
     affected_requirements:
-      - "01-domain.tenant.REQ-013"
+      - "01-domain.tenant.REQ-014"
   - id: "DEC-2026-008"
     status: "accepted"
     decision: "IoTable does not use a separate venue layer. A tenant directly represents the business location and owns areas and tables."
@@ -228,9 +243,20 @@ owner_decisions:
     affected_requirements:
       - "01-domain.tenant.REQ-003"
       - "01-domain.tenant.REQ-007"
-      - "01-domain.tenant.REQ-015"
       - "01-domain.tenant.REQ-016"
       - "01-domain.tenant.REQ-017"
       - "01-domain.tenant.REQ-018"
+      - "01-domain.tenant.REQ-019"
+  - id: "DEC-2026-010"
+    status: "accepted"
+    decision: "Tenant data isolation uses a separate database per tenant. The initial deployment may use one shared database server with separate tenant databases. Dedicated database servers are allowed for selected tenants, but tenant-dedicated database containers and Kubernetes are not required."
+    rationale: "The model preserves strong tenant isolation without adding unnecessary container orchestration complexity to the initial system."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_requirements:
+      - "01-domain.tenant.REQ-007"
+      - "01-domain.tenant.REQ-008"
+      - "01-domain.tenant.REQ-012"
+      - "01-domain.tenant.REQ-021"
 
 open_decisions: []
