@@ -1,0 +1,27 @@
+id: "06-application-surfaces.platform-control-plane"
+title: "Platform Control Plane"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define minimal platform-level control plane capabilities for tenant provisioning and support operations."
+  binding_policy: "Platform control plane must not mix tenant operational data with platform registry data."
+
+authority:
+  tenancy: "specs/04-tenancy/tenant-lifecycle-provisioning.yaml"
+  security: "specs/03-technical/security.yaml"
+
+capabilities:
+  requirement_id: "06-application-surfaces.control-plane.REQ-001"
+  includes:
+    - "tenant_creation"
+    - "tenant_status_management"
+    - "tenant_database_provisioning"
+    - "platform_support_access"
+  excludes:
+    - "tenant_operational_data_editing"
+
+traceability:
+  source_type: "canonical_specification"
+
+open_decisions: []
