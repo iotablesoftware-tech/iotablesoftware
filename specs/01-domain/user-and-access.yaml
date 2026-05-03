@@ -1,0 +1,132 @@
+id: "01-domain.user-and-access"
+title: "User and Access Domain"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define tenant-scoped users, authentication ownership, allowed user types, and access boundaries for IoTable."
+  binding_policy: "All user identity, credentials, sessions, and permissions are tenant-scoped and must not cross tenant boundaries."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+
+identity_model:
+  tenant_scoped_user:
+    requirement_id: "01-domain.user-access.REQ-001"
+    definition: "A user is an account that exists only inside one tenant database."
+    global_user_identity_forbidden: true
+    cross_tenant_identity_reuse_forbidden: true
+    shared_login_across_tenants_forbidden: true
+  user_identifier:
+    requirement_id: "01-domain.user-access.REQ-002"
+    canonical_format: "ulid"
+    unique_scope: "tenant_database"
+    immutable: true
+
+allowed_user_types:
+  owner:
+    requirement_id: "01-domain.user-access.REQ-003"
+    exactly_one_per_tenant: true
+    created_when_tenant_is_created: true
+    can_create_staff: true
+    can_disable_staff: true
+    can_manage_tenant_settings: true
+    can_manage_areas_and_tables: true
+    can_manage_menu: true
+    can_view_orders_and_payments: true
+  staff:
+    requirement_id: "01-domain.user-access.REQ-004"
+    created_by_owner: true
+    max_active_staff_per_tenant: 30
+    can_operate_tables: true
+    can_create_and_update_orders: true
+    can_view_menu: true
+    can_view_assigned_operational_state: true
+
+forbidden_user_types:
+  requirement_id: "01-domain.user-access.REQ-005"
+  values:
+    - "tenant_admin"
+    - "manager"
+    - "cashier"
+    - "waiter"
+    - "kitchen_user"
+    - "shared_user"
+    - "cross_tenant_user"
+    - "platform_operator_as_tenant_user"
+
+staff_limit_policy:
+  requirement_id: "01-domain.user-access.REQ-006"
+  max_active_staff_per_tenant: 30
+  disabled_staff_count_toward_limit: false
+  removed_staff_count_toward_limit: false
+  owner_count_toward_staff_limit: false
+
+authentication_policy:
+  tenant_scoped_authentication:
+    requirement_id: "01-domain.user-access.REQ-007"
+    required: true
+    authentication_context_must_include_tenant: true
+    credentials_stored_in_tenant_database: true
+    session_scope: "single_tenant"
+  login_resolution:
+    requirement_id: "01-domain.user-access.REQ-008"
+    requires_tenant_context: true
+    allowed_tenant_context_sources:
+      - "tenant_subdomain"
+      - "tenant_public_identifier"
+      - "explicit_tenant_selection_before_authentication"
+  credential_reuse:
+    requirement_id: "01-domain.user-access.REQ-009"
+    same_email_allowed_in_different_tenants: true
+    same_email_does_not_create_shared_identity: true
+
+authorization_policy:
+  role_model:
+    requirement_id: "01-domain.user-access.REQ-010"
+    model: "fixed_two_role_model"
+    roles:
+      - "owner"
+      - "staff"
+    custom_roles_forbidden: true
+  owner_authority:
+    requirement_id: "01-domain.user-access.REQ-011"
+    owner_has_full_tenant_authority: true
+    owner_cannot_access_other_tenants: true
+  staff_authority:
+    requirement_id: "01-domain.user-access.REQ-012"
+    staff_has_limited_operational_authority: true
+    staff_cannot_create_staff: true
+    staff_cannot_manage_tenant_settings: true
+    staff_cannot_access_other_tenants: true
+
+session_policy:
+  requirement_id: "01-domain.user-access.REQ-013"
+  session_must_bind_to:
+    - "tenant_id"
+    - "user_id"
+    - "user_type"
+  session_must_not_be_valid_across_tenants: true
+  tenant_status_must_be_checked_for_session_use: true
+
+platform_support_policy:
+  requirement_id: "01-domain.user-access.REQ-014"
+  platform_support_is_not_tenant_user: true
+  platform_support_access_requires_explicit_audit: true
+  platform_support_access_must_not_create_tenant_user_session: true
+
+traceability:
+  source_type: "owner_decision"
+  source_reference:
+    - "DEC-2026-009"
+    - "DEC-2026-010"
+    - "specs/01-domain/tenant.yaml"
+
+open_decisions:
+  - id: "OD-2026-006"
+    status: "open"
+    question: "Which tenant context source is canonical for login: tenant subdomain, tenant public identifier, or explicit tenant selection?"
+    owner: "product_owner"
+    affected_requirements:
+      - "01-domain.user-access.REQ-008"
