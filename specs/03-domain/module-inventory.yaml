@@ -1,0 +1,24 @@
+id: "03-domain.module-inventory"
+title: "Module Inventory"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "List core modules derived from product baseline and architecture."
+
+modules:
+  - "tenant"
+  - "user_access"
+  - "area_table"
+  - "table_session"
+  - "order_management"
+  - "menu_catalog"
+  - "payment"
+  - "realtime"
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/02-system-architecture/backend-solution-structure.yaml"
+
+open_decisions: []
