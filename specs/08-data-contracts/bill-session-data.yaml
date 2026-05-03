@@ -1,0 +1,22 @@
+id: "08-data-contracts.bill-session-data"
+title: "Bill Session Data"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define bill data as a derived projection over table session orders and payments."
+
+contract:
+  requirement_id: "08-data.bill-session.REQ-001"
+  separate_bill_session_table_required: false
+  bill_total_derived_from_order_items: true
+  paid_total_derived_from_payments: true
+  balance_derived_from_total_minus_payments: true
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/03-technical/data-model.yaml"
+    - "specs/02-capabilities/payment-and-closing.yaml"
+
+open_decisions: []
