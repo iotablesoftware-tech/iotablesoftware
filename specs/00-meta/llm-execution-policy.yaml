@@ -142,6 +142,11 @@ post_task_protocol:
   verification_required_when_files_change: true
   verification_commands_must_be_specific: true
 
+verification_policy:
+  canonical_strategy: "direct_schema_validation"
+  package_script_validation_is_manual_support: true
+  agents_must_not_treat_package_script_as_only_source_of_validation_truth: true
+
 implementation_repository_behavior:
   specification_commit_reference_required: true
   required_file: "SPECIFICATION.md"
@@ -155,12 +160,4 @@ schema_behavior:
   schema_must_reject_unknown_structural_fields_when_possible: true
   schema_must_allow_domain_extension_only_when_explicitly_defined: true
 
-open_decisions:
-  - id: "OD-2026-002"
-    status: "open"
-    question: "Which verification command is canonical before package tooling is fully imported into the specification repository?"
-    owner: "product_owner"
-    affected_documents:
-      - "specs/00-meta/llm-execution-policy.yaml"
-      - "package.json"
-      - "tools/validate-specs.ts"
+open_decisions: []
