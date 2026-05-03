@@ -1,0 +1,139 @@
+id: "03-technical.security"
+title: "Security"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define authentication, authorization, tenant isolation, rate limiting, audit logging, credential handling, and security boundaries for IoTable."
+  binding_policy: "All implementation repositories must enforce this security model for tenant-scoped operations and platform support access."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  user_and_access: "specs/01-domain/user-and-access.yaml"
+  api_contracts: "specs/03-technical/api-contracts.yaml"
+  data_model: "specs/03-technical/data-model.yaml"
+
+authentication_policy:
+  method:
+    requirement_id: "03-technical.security.REQ-001"
+    primary_method: "email_password"
+    magic_link_supported: false
+    otp_supported: false
+  password_storage:
+    requirement_id: "03-technical.security.REQ-002"
+    password_hash_required: true
+    plaintext_password_storage_forbidden: true
+    tenant_database_stores_credentials: true
+  jwt:
+    requirement_id: "03-technical.security.REQ-003"
+    required: true
+    tenant_scoped: true
+    token_must_include:
+      - "tenant_id"
+      - "user_id"
+      - "user_type"
+    token_must_not_be_valid_across_tenants: true
+
+rate_limiting:
+  requirement_id: "03-technical.security.REQ-004"
+  required: true
+  applies_to:
+    - "login"
+    - "password_attempts"
+    - "payment_recording"
+    - "order_submission"
+    - "table_session_closing"
+  tenant_scoped_rate_limits_required: true
+  ip_based_rate_limits_allowed: true
+  user_based_rate_limits_allowed: true
+
+authorization_policy:
+  requirement_id: "03-technical.security.REQ-005"
+  fixed_roles:
+    - "owner"
+    - "staff"
+  custom_roles_forbidden: true
+  authorization_must_be_enforced_server_side: true
+  owner_only_actions_must_reject_staff: true
+  tenant_status_must_be_checked_for_protected_actions: true
+
+tenant_isolation_policy:
+  requirement_id: "03-technical.security.REQ-006"
+  database_per_tenant_required: true
+  tenant_user_cross_access_forbidden: true
+  cross_tenant_jwt_reuse_forbidden: true
+  cross_tenant_realtime_delivery_forbidden: true
+  platform_registry_must_not_store_tenant_operational_data: true
+
+platform_support_access:
+  requirement_id: "03-technical.security.REQ-007"
+  platform_support_is_not_tenant_user: true
+  platform_support_access_requires_explicit_audit: true
+  platform_support_access_must_not_create_tenant_user_session: true
+  support_access_must_include_reason: true
+
+audit_policy:
+  requirement_id: "03-technical.security.REQ-008"
+  level: "full_critical_action_audit"
+  audit_events_required_for:
+    - "tenant_creation"
+    - "login_success"
+    - "login_failure"
+    - "staff_created"
+    - "staff_disabled"
+    - "menu_price_changed"
+    - "menu_availability_changed"
+    - "order_submitted"
+    - "order_cancelled"
+    - "payment_recorded"
+    - "payment_voided"
+    - "table_session_closed"
+    - "platform_support_access"
+  audit_event_must_include:
+    - "event_id"
+    - "tenant_id_when_applicable"
+    - "actor_type"
+    - "actor_id_when_applicable"
+    - "event_type"
+    - "entity_type"
+    - "entity_id"
+    - "occurred_at"
+    - "metadata"
+
+secret_handling:
+  requirement_id: "03-technical.security.REQ-009"
+  secrets_must_not_be_committed: true
+  environment_variables_allowed: true
+  secret_manager_allowed: true
+  jwt_secret_must_be_configured_outside_source_code: true
+  database_credentials_must_be_configured_outside_source_code: true
+
+security_response_policy:
+  requirement_id: "03-technical.security.REQ-010"
+  auth_errors_must_not_reveal_user_existence: true
+  tenant_resolution_errors_must_not_reveal_private_tenant_data: true
+  cross_tenant_access_attempts_must_return_forbidden_or_not_found_without_private_detail: true
+  validation_errors_may_return_field_level_errors: true
+
+traceability:
+  source_type: "owner_decision"
+  source_reference:
+    - "DEC-2026-020"
+    - "specs/01-domain/tenant.yaml"
+    - "specs/01-domain/user-and-access.yaml"
+    - "specs/03-technical/api-contracts.yaml"
+
+owner_decisions:
+  - id: "DEC-2026-020"
+    status: "accepted"
+    decision: "IoTable uses email/password authentication, rate limiting for sensitive actions, and full audit logging for critical actions."
+    rationale: "This model keeps authentication simple while protecting login, payment, order, closing, and support operations."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_requirements:
+      - "03-technical.security.REQ-001"
+      - "03-technical.security.REQ-004"
+      - "03-technical.security.REQ-008"
+
+open_decisions: []
