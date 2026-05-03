@@ -1,27 +1,16 @@
-# iotablesoftware
+# IoTable Implementation Specification
 
-Public monorepo for IoTable Software projects.
+IoTable is a multi-tenant cafe and restaurant operations platform.
 
-## Repository structure
+This repository contains the canonical implementation specification.
 
-```text
-apps/       Application projects
-packages/   Shared libraries and reusable packages
-docs/       Project documentation and notes
-```
+## Structure
 
-## Project merge plan
+specs/      YAML specifications
+schemas/    JSON schemas
+tools/      validation tooling
 
-Projects will be added under `apps/` or `packages/` depending on their role.
+## Usage
 
-Suggested layout:
-
-```text
-apps/<project-name>/
-packages/<package-name>/
-docs/<topic>.md
-```
-
-## Development
-
-Project-specific setup instructions will be documented inside each project folder as they are merged.
+pnpm install
+pnpm validate
