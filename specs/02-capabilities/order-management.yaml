@@ -1,0 +1,112 @@
+id: "02-capabilities.order-management"
+title: "Order Management Capability"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define order lifecycle, item management, order state transitions, and operational behavior for IoTable."
+  binding_policy: "All orders must be tenant-scoped and bound to a table session."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  table_service: "specs/02-capabilities/table-service.yaml"
+  user_and_access: "specs/01-domain/user-and-access.yaml"
+
+order_model:
+  order:
+    requirement_id: "02-capabilities.order.REQ-001"
+    definition: "An order represents a collection of items requested during a table session."
+    required_fields:
+      - "id"
+      - "tenant_id"
+      - "table_id"
+      - "table_session_id"
+      - "status"
+      - "created_by_user_id"
+  order_item:
+    requirement_id: "02-capabilities.order.REQ-002"
+    definition: "An order item represents a menu item instance added to an order."
+    required_fields:
+      - "id"
+      - "order_id"
+      - "menu_item_id"
+      - "quantity"
+      - "status"
+
+status_model:
+  order_status:
+    requirement_id: "02-capabilities.order.REQ-003"
+    allowed_values:
+      - "open"
+      - "submitted"
+      - "preparing"
+      - "served"
+      - "completed"
+      - "cancelled"
+  order_item_status:
+    requirement_id: "02-capabilities.order.REQ-004"
+    allowed_values:
+      - "pending"
+      - "submitted"
+      - "preparing"
+      - "ready"
+      - "served"
+      - "cancelled"
+
+lifecycle:
+  create_order:
+    requirement_id: "02-capabilities.order.REQ-005"
+    must_bind_to_table_session: true
+    initial_status: "open"
+  submit_order:
+    requirement_id: "02-capabilities.order.REQ-006"
+    moves_status_to: "submitted"
+    requires_at_least_one_item: true
+  kitchen_flow:
+    requirement_id: "02-capabilities.order.REQ-007"
+    supports_item_level_progression: true
+    order_status_may_follow_item_progress: true
+  complete_order:
+    requirement_id: "02-capabilities.order.REQ-008"
+    requires_all_items_served_or_cancelled: true
+    moves_status_to: "completed"
+  cancel_order:
+    requirement_id: "02-capabilities.order.REQ-009"
+    allowed_when_not_completed: true
+    moves_status_to: "cancelled"
+
+item_management:
+  add_item:
+    requirement_id: "02-capabilities.order.REQ-010"
+    allowed_when_order_open: true
+  update_item_quantity:
+    requirement_id: "02-capabilities.order.REQ-011"
+    allowed_when_item_not_served: true
+  remove_item:
+    requirement_id: "02-capabilities.order.REQ-012"
+    allowed_when_item_not_served: true
+
+concurrency_policy:
+  requirement_id: "02-capabilities.order.REQ-013"
+  concurrent_item_updates_allowed: true
+  order_must_handle_conflicting_updates: true
+
+access_policy:
+  requirement_id: "02-capabilities.order.REQ-014"
+  owner_can_manage_orders: true
+  staff_can_manage_orders: true
+  operations_must_be_tenant_scoped: true
+
+realtime_policy:
+  requirement_id: "02-capabilities.order.REQ-015"
+  order_updates_emit_event: true
+  item_updates_emit_event: true
+  event_scope: "tenant"
+
+traceability:
+  source_type: "system_design"
+  source_reference:
+    - "specs/02-capabilities/table-service.yaml"
+    - "specs/01-domain/user-and-access.yaml"
+
+open_decisions: []
