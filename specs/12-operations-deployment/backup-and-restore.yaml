@@ -1,0 +1,38 @@
+id: "12-operations-deployment.backup-and-restore"
+title: "Backup and Restore"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define backup and restore expectations for platform registry and tenant databases."
+  binding_policy: "Backup and restore operations must preserve tenant isolation and must not mix tenant data across tenant databases."
+
+authority:
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  data_model: "specs/03-technical/data-model.yaml"
+  security: "specs/03-technical/security.yaml"
+
+backup_scope:
+  requirement_id: "12-ops.backup.REQ-001"
+  platform_registry_backup_required: true
+  tenant_database_backup_required: true
+  tenant_backups_must_be_isolated_per_tenant: true
+
+restore_scope:
+  requirement_id: "12-ops.backup.REQ-002"
+  tenant_database_restore_must_target_single_tenant: true
+  platform_registry_restore_must_not_overwrite_tenant_operational_data: true
+  restore_must_require_operator_authorization: true
+
+verification:
+  requirement_id: "12-ops.backup.REQ-003"
+  backup_restore_drill_required_before_production: true
+  restore_process_must_be_documented_in_implementation_repository: true
+
+traceability:
+  source_type: "imported_reference_adapted"
+  source_reference:
+    - "tabflow/docs/how-to/backup-and-restore.md"
+    - "specs/03-technical/data-model.yaml"
+
+open_decisions: []
