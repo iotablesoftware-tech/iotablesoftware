@@ -5,16 +5,21 @@ version: "1.0.0"
 
 purpose:
   primary_purpose: "Define health check requirements for backend service and tenant database connectivity."
-  binding_policy: "Health endpoints must accurately reflect system readiness and liveness."
+  binding_policy: "Health endpoints must accurately reflect system readiness and liveness and must align with the canonical API prefix."
+
+authority:
+  api_contracts: "specs/03-technical/api-contracts.yaml"
+  observability: "specs/03-technical/observability.yaml"
+  data_model: "specs/03-technical/data-model.yaml"
 
 health_endpoints:
   requirement_id: "12-ops.health.REQ-001"
   liveness:
-    path: "/health/live"
+    path: "/api/v1/health/live"
     must_verify:
       - "process_running"
   readiness:
-    path: "/health/ready"
+    path: "/api/v1/health/ready"
     must_verify:
       - "platform_registry_connection"
       - "tenant_database_routing_available"
@@ -24,5 +29,13 @@ rules:
   requirement_id: "12-ops.health.REQ-002"
   readiness_must_fail_if_dependencies_unavailable: true
   liveness_must_not_depend_on_external_services: true
+  health_endpoints_must_not_require_tenant_resolution: true
+  health_endpoints_must_not_expose_private_tenant_data: true
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/03-technical/api-contracts.yaml"
+    - "specs/03-technical/observability.yaml"
 
 open_decisions: []
