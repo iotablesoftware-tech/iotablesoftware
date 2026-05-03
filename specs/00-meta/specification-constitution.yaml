@@ -1,0 +1,215 @@
+id: "00-meta.specification-constitution"
+title: "Specification Constitution"
+status: "canonical"
+version: "1.0.0"
+
+product_identity:
+  product_name: "IoTable"
+  product_type: "multi-tenant cafe and restaurant operations platform"
+  specification_repository: "iotablesoftware-tech/iotablesoftware"
+
+specification_purpose:
+  primary_purpose: "Define the final-state product, architecture, data, API, operational, security, and implementation requirements for IoTable."
+  audience:
+    - "product_owner"
+    - "human_developers"
+    - "llm_coding_agents"
+    - "implementation_repositories"
+  binding_policy: "The specification is authoritative for downstream implementation work."
+
+source_of_truth_policy:
+  hierarchy:
+    - "specs/00-meta/specification-constitution.yaml"
+    - "specs/00-meta/documentation-index.yaml"
+    - "specs/00-meta/llm-execution-policy.yaml"
+    - "domain_and_capability_specifications"
+    - "schemas"
+    - "implementation_code"
+  implementation_code_must_not_define_product_behavior_without_spec: true
+  conflicting_documents_resolved_by_highest_authority: true
+
+pre_implementation_authoring_policy:
+  status: "active_until_first_implementation_repository"
+  principle: "All specification content is authored as timeless final-state truth."
+  allowed_change_style:
+    - "replace_in_place"
+    - "rewrite_to_final_state"
+    - "remove_obsolete_text_without_reference"
+  forbidden_language_categories:
+    - "historical_change_language"
+    - "migration_language"
+    - "changelog_language"
+    - "legacy_language"
+    - "backward_compatibility_language"
+  forbidden_terms:
+    - "previously"
+    - "formerly"
+    - "changed from"
+    - "migrated from"
+    - "deprecated"
+    - "legacy"
+    - "backward compatible"
+  future_revision_trigger:
+    - "first_implementation_repository_created"
+    - "first_production_code_generated"
+
+version_policy:
+  mode: "frozen_pre_implementation"
+  current_version: "1.0.0"
+  increments_allowed: false
+  meaning: "Document identity marker only until implementation repositories begin tracking specification revisions."
+  update_required_when:
+    - "implementation_repositories_begin_tracking_spec_revisions"
+
+branch_policy:
+  canonical_branch: "main"
+  implementation_work_must_reference_canonical_branch: true
+
+missing_information_policy:
+  agents_must_not_invent_missing_behavior: true
+  missing_required_behavior_requires_blocker: true
+  blocker_output_must_include:
+    - "missing_requirement"
+    - "affected_documents"
+    - "decision_needed"
+
+format_policy:
+  source_format: "yaml"
+  schema_format: "json_schema"
+  every_yaml_specification_requires_matching_schema: true
+  schemas_must_validate_source_documents: true
+
+document_final_state_policy:
+  documents_describe_final_state: true
+  migration_style_documents_forbidden: true
+  changelog_style_documents_forbidden: true
+  documents_must_not_reference_obsolete_states: true
+
+decision_record_policy:
+  required: true
+  location: "specs/00-meta/decision-records.yaml"
+  purpose: "Record owner-approved product and architecture decisions that justify the current final-state specification."
+  historical_change_log_forbidden: true
+  decision_id_format: "DEC-YYYY-NNN"
+  required_fields:
+    - "id"
+    - "status"
+    - "decision"
+    - "rationale"
+    - "date"
+    - "owner"
+    - "affected_documents"
+
+traceability_policy:
+  requirement_id_required: true
+  requirement_id_format: "{document_id}.REQ-{number}"
+  trace_target: "current_final_state_requirement"
+  historical_trace_forbidden: true
+  every_requirement_must_reference:
+    - "source_type"
+    - "source_reference"
+  owner_decision_reference_required_when:
+    - "requirement_is_based_on_explicit_owner_choice"
+    - "requirement_resolves_previous_open_question"
+
+open_decision_policy:
+  statuses:
+    - "open"
+    - "proposed"
+    - "accepted"
+    - "rejected"
+    - "superseded"
+  closure_requires:
+    - "owner_decision"
+    - "affected_documents_rewritten_as_final_state"
+    - "no_historical_or_migration_language"
+    - "schema_validation_passed"
+
+implementation_repository_policy:
+  implementation_repositories_allowed: true
+  specification_repository: "iotablesoftware-tech/iotablesoftware"
+  implementation_repo_must_reference_spec_commit: true
+  implementation_repo_must_not_reference_spec_version_before_tracking_policy_exists: true
+  implementation_repo_must_not_define_product_behavior_without_spec: true
+  required_files:
+    - "SPECIFICATION.md"
+
+llm_execution_policy:
+  agents_must_read_meta_documents_first: true
+  agents_must_follow_source_of_truth_hierarchy: true
+  agents_must_emit_blockers_for_missing_requirements: true
+  agents_must_not_create_unapproved_product_behavior: true
+
+agent_task_protocol:
+  before_task:
+    - "load_meta_documents"
+    - "load_relevant_capability_documents"
+    - "identify_open_decisions"
+  during_task:
+    - "do_not_invent_missing_behavior"
+    - "do_not_write_historical_change_language"
+    - "rewrite_documents_as_current_final_state"
+    - "emit_blocker_when_required_behavior_is_missing"
+  after_task:
+    - "list_changed_files"
+    - "list_owner_decisions_applied"
+    - "list_verification_commands"
+    - "list_unresolved_blockers"
+  forbidden_output_patterns:
+    - "updated from"
+    - "previous behavior"
+    - "new behavior"
+    - "migration"
+    - "legacy"
+    - "deprecated"
+
+engineering_principles:
+  tenant_isolation_required: true
+  security_by_default: true
+  observability_required: true
+  automated_validation_required: true
+  tests_required_for_implementation_behavior: true
+
+done_definition:
+  specification_change_done_when:
+    - "document_rewritten_as_final_state"
+    - "matching_schema_exists"
+    - "schema_validation_passes"
+    - "open_decisions_resolved_or_declared"
+    - "no_forbidden_historical_language"
+
+owner_decisions:
+  - id: "DEC-2026-001"
+    status: "accepted"
+    decision: "The canonical branch is main."
+    rationale: "The repository uses main as its canonical branch."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_documents:
+      - "specs/00-meta/specification-constitution.yaml"
+  - id: "DEC-2026-002"
+    status: "accepted"
+    decision: "Implementation code lives in separate repositories."
+    rationale: "The specification repository remains the canonical source of truth and is not mixed with downstream implementation code."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_documents:
+      - "specs/00-meta/specification-constitution.yaml"
+  - id: "DEC-2026-003"
+    status: "accepted"
+    decision: "Before implementation starts, specification changes are rewritten in place as timeless final-state truth. Version increments, changelog language, migration language, legacy language, and backward-compatibility language are forbidden."
+    rationale: "The specification must read as the current intended system design rather than a history of edits."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_documents:
+      - "specs/00-meta/specification-constitution.yaml"
+  - id: "DEC-2026-004"
+    status: "accepted"
+    decision: "Implementation repositories must reference the specification repository by commit SHA until a post-implementation version tracking policy exists."
+    rationale: "Version increments are disabled before implementation, so commit SHA is the stable reference mechanism."
+    date: "2026-05-03"
+    owner: "product_owner"
+    affected_documents:
+      - "specs/00-meta/specification-constitution.yaml"
+
+open_decisions: []
