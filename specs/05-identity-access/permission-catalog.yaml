@@ -1,0 +1,61 @@
+id: "05-identity-access.permission-catalog"
+title: "Permission Catalog"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define fixed permissions for owner and staff users."
+  binding_policy: "IoTable uses a fixed two-role access model. Custom permissions and custom roles are not supported."
+
+authority:
+  user_and_access: "specs/01-domain/user-and-access.yaml"
+  security: "specs/03-technical/security.yaml"
+
+role_model:
+  requirement_id: "05-identity-access.permissions.REQ-001"
+  roles:
+    - "owner"
+    - "staff"
+  custom_roles_supported: false
+  custom_permissions_supported: false
+
+owner_permissions:
+  requirement_id: "05-identity-access.permissions.REQ-002"
+  permissions:
+    - "manage_staff"
+    - "manage_areas"
+    - "manage_tables"
+    - "manage_menu"
+    - "manage_prices"
+    - "manage_availability"
+    - "manage_orders"
+    - "record_payments"
+    - "void_payments"
+    - "close_table_sessions"
+    - "view_audit_relevant_activity"
+
+staff_permissions:
+  requirement_id: "05-identity-access.permissions.REQ-003"
+  permissions:
+    - "view_tables"
+    - "manage_table_state"
+    - "create_orders"
+    - "submit_orders"
+    - "progress_order_items"
+    - "record_payments"
+    - "close_table_sessions"
+
+forbidden_staff_permissions:
+  requirement_id: "05-identity-access.permissions.REQ-004"
+  permissions:
+    - "manage_staff"
+    - "manage_prices"
+    - "manage_availability"
+    - "manage_tenant_settings"
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/01-domain/user-and-access.yaml"
+
+open_decisions: []
