@@ -4,11 +4,12 @@ status: "canonical"
 version: "1.0.0"
 
 purpose:
-  primary_purpose: "Define acceptance criteria for IoTable product, API, data, security, and operational behavior."
+  primary_purpose: "Define acceptance criteria for IoTable product, API, data, security, customer access, and operational behavior."
   binding_policy: "Implementation repositories must satisfy these acceptance criteria before production use."
 
 authority:
   product_baseline: "specs/01-product/product-baseline.yaml"
+  customer_table_access: "specs/02-capabilities/customer-table-access.yaml"
   api_contracts: "specs/03-technical/api-contracts.yaml"
   security: "specs/03-technical/security.yaml"
   data_model: "specs/03-technical/data-model.yaml"
@@ -20,6 +21,7 @@ criteria:
       - "tenant_users_cannot_access_other_tenants"
       - "tenant_jwt_not_valid_for_other_tenant"
       - "tenant_data_lives_in_separate_database"
+      - "customer_access_ticket_not_valid_for_other_tenant"
   setup_flow:
     requirement_id: "11-testing.acceptance.REQ-002"
     must_verify:
@@ -32,17 +34,39 @@ criteria:
       - "first_order_creates_table_session"
       - "submitted_order_is_immutable"
       - "additional_items_after_submission_create_new_order"
-  payment_flow:
+  customer_qr_flow:
     requirement_id: "11-testing.acceptance.REQ-004"
+    must_verify:
+      - "customer_can_join_table_with_valid_qr"
+      - "qr_token_is_short_lived"
+      - "qr_token_is_single_use"
+      - "consumed_qr_token_cannot_be_reused"
+      - "customer_access_ticket_is_http_only_cookie"
+      - "customer_access_ticket_is_bound_to_table_session"
+      - "server_side_cart_is_created_for_customer_access_ticket"
+      - "cart_is_not_stored_in_local_storage_or_cookie_payload"
+      - "customer_order_submit_requires_fresh_qr_proof"
+      - "customer_submitted_order_uses_same_immutable_order_model"
+  payment_flow:
+    requirement_id: "11-testing.acceptance.REQ-005"
     must_verify:
       - "split_payment_supported"
       - "payment_cannot_exceed_balance"
       - "session_close_requires_zero_balance"
       - "session_close_is_manual"
+      - "closed_session_invalidates_customer_access_ticket"
   realtime:
-    requirement_id: "11-testing.acceptance.REQ-005"
+    requirement_id: "11-testing.acceptance.REQ-006"
     must_verify:
       - "tenant_scoped_events_delivered"
+      - "customer_access_events_are_tenant_scoped"
       - "cross_tenant_event_delivery_forbidden"
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "DEC-2026-021"
+    - "specs/02-capabilities/customer-table-access.yaml"
+    - "specs/03-technical/security.yaml"
 
 open_decisions: []
