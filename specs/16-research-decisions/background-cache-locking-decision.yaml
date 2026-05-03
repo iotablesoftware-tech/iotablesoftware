@@ -1,0 +1,48 @@
+id: "16-research-decisions.background-cache-locking-decision"
+title: "Background Cache and Locking Decision"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define concurrency and locking expectations for critical IoTable operations without requiring a specific cache or distributed lock technology in the initial implementation."
+  binding_policy: "Critical operations must be protected against duplicate or conflicting execution. The implementation repository chooses the concrete mechanism according to research policy."
+
+authority:
+  research_policy: "specs/00-meta/research-policy.yaml"
+  order_management: "specs/02-capabilities/order-management.yaml"
+  payment_and_closing: "specs/02-capabilities/payment-and-closing.yaml"
+  data_model: "specs/03-technical/data-model.yaml"
+
+locking_policy:
+  requirement_id: "16-research.locking.REQ-001"
+  required_for:
+    - "order_submission"
+    - "payment_recording"
+    - "payment_voiding"
+    - "table_session_closing"
+    - "tenant_provisioning_retry"
+  duplicate_execution_must_be_prevented: true
+  conflicting_updates_must_be_rejected_or_retried: true
+
+cache_policy:
+  requirement_id: "16-research.locking.REQ-002"
+  cache_required_initially: false
+  cache_allowed_for:
+    - "tenant_resolution_metadata"
+    - "menu_read_models"
+    - "realtime_connection_state"
+  cache_must_not_be_source_of_truth: true
+  database_remains_source_of_truth: true
+
+technology_selection:
+  requirement_id: "16-research.locking.REQ-003"
+  exact_locking_technology_defined_in_implementation_repository: true
+  exact_cache_technology_defined_in_implementation_repository: true
+  selection_must_follow_research_policy: true
+
+traceability:
+  source_type: "research_decision"
+  source_reference:
+    - "specs/00-meta/research-policy.yaml"
+
+open_decisions: []
