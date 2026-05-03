@@ -1,0 +1,34 @@
+id: "07-api-contracts.bill-session-api"
+title: "Bill Session API"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define bill-oriented API behavior as a derived view over table session orders and payments."
+  binding_policy: "Bill APIs must not introduce a separate bill session entity."
+
+authority:
+  api_contracts: "specs/03-technical/api-contracts.yaml"
+  payment_and_closing: "specs/02-capabilities/payment-and-closing.yaml"
+
+routes:
+  requirement_id: "07-api.bill-session.REQ-001"
+  bill_summary:
+    method: "GET"
+    path: "/api/v1/table-sessions/{table_session_id}/bill"
+  close_session:
+    method: "POST"
+    path: "/api/v1/table-sessions/{table_session_id}/close"
+
+rules:
+  requirement_id: "07-api.bill-session.REQ-002"
+  bill_is_derived: true
+  close_requires_no_unpaid_balance: true
+  close_is_manual: true
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/02-capabilities/payment-and-closing.yaml"
+
+open_decisions: []
