@@ -1,0 +1,29 @@
+id: "07-api-contracts.customer-order-api"
+title: "Customer Order API"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define order and order item API behavior within a table session."
+
+routes:
+  requirement_id: "07-api.order.REQ-001"
+  create_order:
+    method: "POST"
+    path: "/api/v1/table-sessions/{table_session_id}/orders"
+  submit_order:
+    method: "POST"
+    path: "/api/v1/orders/{order_id}/submit"
+  add_item:
+    method: "POST"
+    path: "/api/v1/orders/{order_id}/items"
+  list_orders:
+    method: "GET"
+    path: "/api/v1/table-sessions/{table_session_id}/orders"
+
+rules:
+  requirement_id: "07-api.order.REQ-002"
+  submitted_orders_immutable: true
+  additional_items_after_submission_create_new_order: true
+
+open_decisions: []
