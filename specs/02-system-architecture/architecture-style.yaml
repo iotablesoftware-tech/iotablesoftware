@@ -1,0 +1,61 @@
+id: "02-system-architecture.architecture-style"
+title: "Architecture Style"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define the canonical architecture style for IoTable implementation repositories."
+  binding_policy: "Implementation repositories must preserve tenant isolation, simple deployment, REST APIs, realtime events, and PostgreSQL database-per-tenant persistence."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  product_baseline: "specs/01-product/product-baseline.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  api_contracts: "specs/03-technical/api-contracts.yaml"
+  data_model: "specs/03-technical/data-model.yaml"
+
+architecture_style:
+  requirement_id: "02-system-architecture.architecture-style.REQ-001"
+  primary_style: "modular_monolith_backend_with_separate_tenant_databases"
+  microservices_required: false
+  kubernetes_required: false
+  tenant_per_container_required: false
+
+backend_boundary:
+  requirement_id: "02-system-architecture.architecture-style.REQ-002"
+  backend_owns:
+    - "tenant_resolution"
+    - "authentication"
+    - "authorization"
+    - "tenant_database_routing"
+    - "business_rules"
+    - "realtime_event_emission"
+  backend_must_not_store_tenant_operational_data_in_platform_registry: true
+
+frontend_boundary:
+  requirement_id: "02-system-architecture.architecture-style.REQ-003"
+  frontend_consumes_rest_api: true
+  frontend_consumes_realtime_events: true
+  frontend_must_not_enforce_security_as_only_control: true
+
+persistence_boundary:
+  requirement_id: "02-system-architecture.architecture-style.REQ-004"
+  database_engine: "postgresql"
+  tenant_data_strategy: "database_per_tenant"
+  platform_registry_strategy: "separate_platform_registry"
+
+integration_style:
+  requirement_id: "02-system-architecture.architecture-style.REQ-005"
+  api_style: "rest"
+  realtime_style: "websocket_or_equivalent_realtime_events"
+  async_background_processing_allowed: true
+  message_broker_required_initially: false
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/01-product/product-baseline.yaml"
+    - "specs/03-technical/api-contracts.yaml"
+    - "specs/03-technical/data-model.yaml"
+
+open_decisions: []
