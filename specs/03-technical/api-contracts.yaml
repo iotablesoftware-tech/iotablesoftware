@@ -4,13 +4,14 @@ status: "canonical"
 version: "1.0.0"
 
 purpose:
-  primary_purpose: "Define API style, tenant resolution, authentication contract, realtime contract, request behavior, response behavior, and error conventions for IoTable implementation repositories."
+  primary_purpose: "Define API style, tenant resolution, authentication contract, customer table access contract, realtime contract, request behavior, response behavior, and error conventions for IoTable implementation repositories."
   binding_policy: "All backend APIs must follow these contracts unless a higher-authority specification explicitly defines a narrower behavior."
 
 authority:
   constitution: "specs/00-meta/specification-constitution.yaml"
   tenant_domain: "specs/01-domain/tenant.yaml"
   user_and_access: "specs/01-domain/user-and-access.yaml"
+  customer_table_access: "specs/02-capabilities/customer-table-access.yaml"
   table_service: "specs/02-capabilities/table-service.yaml"
   order_management: "specs/02-capabilities/order-management.yaml"
   menu_catalog: "specs/02-capabilities/menu-catalog.yaml"
@@ -29,7 +30,8 @@ base_contract:
   version_prefix_required: true
   initial_version_prefix: "/api/v1"
   all_routes_require_tenant_resolution_except:
-    - "/api/v1/health"
+    - "/api/v1/health/live"
+    - "/api/v1/health/ready"
     - "/api/v1/platform/tenants/resolve"
 
 tenant_resolution:
@@ -62,8 +64,18 @@ authorization:
   owner_routes_must_reject_staff: true
   staff_routes_must_reject_missing_or_invalid_tenant_session: true
 
-request_contract:
+customer_access_contract:
   requirement_id: "03-technical.api.REQ-006"
+  customer_access_uses_jwt: false
+  customer_access_uses_qr_token_and_access_ticket: true
+  access_ticket_transport: "http_only_cookie"
+  customer_access_ticket_scope: "single_table_session"
+  customer_routes_require_resolved_tenant: true
+  customer_routes_must_not_create_tenant_user_session: true
+  customer_submit_requires_fresh_qr_proof: true
+
+request_contract:
+  requirement_id: "03-technical.api.REQ-007"
   request_body_format: "json"
   unknown_fields_policy: "reject_when_contract_defined"
   client_generated_ids_allowed: false
@@ -71,10 +83,11 @@ request_contract:
   idempotency_key_required_for:
     - "payment_recording"
     - "order_submission"
+    - "customer_order_submission"
     - "table_session_closing"
 
 response_contract:
-  requirement_id: "03-technical.api.REQ-007"
+  requirement_id: "03-technical.api.REQ-008"
   success_response_shape:
     object: "data"
     metadata_object: "meta"
@@ -87,7 +100,7 @@ response_contract:
   timestamps_format: "iso_8601"
 
 error_contract:
-  requirement_id: "03-technical.api.REQ-008"
+  requirement_id: "03-technical.api.REQ-009"
   standard_statuses:
     validation_error: 400
     unauthenticated: 401
@@ -101,15 +114,16 @@ error_contract:
   authorization_errors_must_not_reveal_cross_tenant_existence: true
 
 realtime_contract:
-  requirement_id: "03-technical.api.REQ-009"
+  requirement_id: "03-technical.api.REQ-010"
   enabled: true
   transport: "websocket_or_equivalent_realtime_events"
   event_scope: "tenant"
-  realtime_auth_mechanism: "jwt"
+  realtime_auth_mechanism: "jwt_for_tenant_users"
   realtime_connection_must_bind_to:
     - "tenant_id"
     - "user_id"
     - "user_type"
+  customer_realtime_access_allowed_with_access_ticket: true
   cross_tenant_event_delivery_forbidden: true
   canonical_event_envelope:
     required_fields:
@@ -120,11 +134,13 @@ realtime_contract:
       - "payload"
 
 canonical_event_types:
-  requirement_id: "03-technical.api.REQ-010"
+  requirement_id: "03-technical.api.REQ-011"
   values:
     - "table.state_changed"
     - "table_session.created"
     - "table_session.closed"
+    - "customer_access.joined"
+    - "customer_cart.updated"
     - "order.created"
     - "order.submitted"
     - "order.status_changed"
@@ -135,10 +151,20 @@ canonical_event_types:
     - "menu.availability_changed"
 
 route_groups:
-  requirement_id: "03-technical.api.REQ-011"
+  requirement_id: "03-technical.api.REQ-012"
   groups:
     auth:
       prefix: "/api/v1/auth"
+    customer_access:
+      prefix: "/api/v1/customer"
+      required_routes:
+        - "POST /api/v1/customer/qr/join"
+        - "GET /api/v1/customer/menu"
+        - "GET /api/v1/customer/cart"
+        - "POST /api/v1/customer/cart/items"
+        - "PATCH /api/v1/customer/cart/items/{cart_item_id}"
+        - "DELETE /api/v1/customer/cart/items/{cart_item_id}"
+        - "POST /api/v1/customer/orders/submit"
     areas:
       prefix: "/api/v1/areas"
     tables:
@@ -156,19 +182,21 @@ traceability:
   source_type: "owner_decision"
   source_reference:
     - "DEC-2026-018"
+    - "DEC-2026-021"
     - "specs/01-domain/tenant.yaml"
     - "specs/01-domain/user-and-access.yaml"
+    - "specs/02-capabilities/customer-table-access.yaml"
 
 owner_decisions:
   - id: "DEC-2026-018"
     status: "accepted"
-    decision: "IoTable uses REST APIs, realtime events, and JWT authentication."
-    rationale: "REST keeps the API simple, realtime events support live operations, and JWT matches tenant-scoped stateless authentication."
+    decision: "IoTable uses REST APIs, realtime events, and JWT authentication for tenant users."
+    rationale: "REST keeps the API simple, realtime events support live operations, and JWT matches tenant-scoped tenant-user authentication."
     date: "2026-05-03"
     owner: "product_owner"
     affected_requirements:
       - "03-technical.api.REQ-001"
       - "03-technical.api.REQ-004"
-      - "03-technical.api.REQ-009"
+      - "03-technical.api.REQ-010"
 
 open_decisions: []
