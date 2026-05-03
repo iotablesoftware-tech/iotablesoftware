@@ -1,0 +1,18 @@
+id: "06-application-surfaces.platform-provisioning-retry"
+title: "Platform Provisioning Retry"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define retry behavior for failed tenant provisioning steps."
+
+retry_policy:
+  requirement_id: "06-application-surfaces.provisioning-retry.REQ-001"
+  retryable_steps:
+    - "database_creation"
+    - "schema_initialization"
+    - "owner_creation"
+  retries_must_be_idempotent: true
+  failure_must_be_logged_and_audited: true
+
+open_decisions: []
