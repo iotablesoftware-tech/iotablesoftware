@@ -1,0 +1,17 @@
+id: "03-domain.station-order-routing"
+title: "Station Order Routing"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define how order items are routed to preparation stations if implemented."
+
+status:
+  requirement_id: "03-domain.station-routing.REQ-001"
+  initial_version_optional: true
+  station_routing_required: false
+
+traceability:
+  source_type: "system_design"
+
+open_decisions: []
