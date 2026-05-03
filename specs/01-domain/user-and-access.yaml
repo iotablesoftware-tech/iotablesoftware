@@ -73,10 +73,10 @@ authentication_policy:
   login_resolution:
     requirement_id: "01-domain.user-access.REQ-008"
     requires_tenant_context: true
+    canonical_tenant_context_source: "tenant_subdomain"
     allowed_tenant_context_sources:
       - "tenant_subdomain"
-      - "tenant_public_identifier"
-      - "explicit_tenant_selection_before_authentication"
+    tenant_subdomain_must_resolve_before_authentication: true
   credential_reuse:
     requirement_id: "01-domain.user-access.REQ-009"
     same_email_allowed_in_different_tenants: true
@@ -121,12 +121,17 @@ traceability:
   source_reference:
     - "DEC-2026-009"
     - "DEC-2026-010"
+    - "DEC-2026-011"
     - "specs/01-domain/tenant.yaml"
 
-open_decisions:
-  - id: "OD-2026-006"
-    status: "open"
-    question: "Which tenant context source is canonical for login: tenant subdomain, tenant public identifier, or explicit tenant selection?"
+owner_decisions:
+  - id: "DEC-2026-011"
+    status: "accepted"
+    decision: "Tenant login context is resolved by tenant subdomain."
+    rationale: "Subdomain-based tenant resolution provides a clear tenant boundary before authentication."
+    date: "2026-05-03"
     owner: "product_owner"
     affected_requirements:
       - "01-domain.user-access.REQ-008"
+
+open_decisions: []
