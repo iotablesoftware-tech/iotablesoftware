@@ -1,6 +1,6 @@
 id: "01-domain.tenant"
 title: "Tenant Domain"
-status: "draft"
+status: "canonical"
 version: "1.0.0"
 
 purpose:
@@ -17,6 +17,7 @@ core_model:
     definition: "A tenant represents one business customer account using IoTable."
     requirement_id: "01-domain.tenant.REQ-001"
     required: true
+    business_scope: "single_business"
     owns:
       - "venues"
       - "users"
@@ -46,7 +47,7 @@ core_model:
     immutable: true
     globally_unique: true
     exposed_to_clients: true
-    recommended_format: "opaque_uuid_or_ulid"
+    canonical_format: "ulid"
 
 isolation_policy:
   tenant_isolation_required:
@@ -87,8 +88,10 @@ lifecycle:
   suspension:
     requirement_id: "01-domain.tenant.REQ-012"
     blocks_operational_write_actions: true
+    allows_tenant_scoped_read_actions: true
     allows_owner_account_access: true
     allows_platform_operator_access: true
+    allows_admin_actions_required_to_restore_service: true
   closure:
     requirement_id: "01-domain.tenant.REQ-013"
     blocks_operational_access: true
@@ -165,26 +168,37 @@ traceability:
   source_type: "owner_and_system_design"
   source_reference:
     - "DEC-2026-002"
+    - "DEC-2026-005"
+    - "DEC-2026-006"
+    - "DEC-2026-007"
     - "specs/00-meta/specification-constitution.yaml"
     - "specs/00-meta/documentation-index.yaml"
 
-open_decisions:
-  - id: "OD-2026-003"
-    status: "open"
-    question: "Does one tenant always represent one legal business entity, or can one tenant represent a reseller/group account containing multiple businesses?"
+owner_decisions:
+  - id: "DEC-2026-005"
+    status: "accepted"
+    decision: "One tenant represents one business customer account."
+    rationale: "The tenant boundary stays simple and maps directly to customer data isolation."
+    date: "2026-05-03"
     owner: "product_owner"
     affected_requirements:
       - "01-domain.tenant.REQ-001"
       - "01-domain.tenant.REQ-002"
-  - id: "OD-2026-004"
-    status: "open"
-    question: "Which tenant identifier format is canonical: UUID, ULID, or another opaque identifier?"
+  - id: "DEC-2026-006"
+    status: "accepted"
+    decision: "Tenant identifiers use ULID format."
+    rationale: "ULID provides opaque globally unique identifiers with operationally useful ordering characteristics."
+    date: "2026-05-03"
     owner: "product_owner"
     affected_requirements:
       - "01-domain.tenant.REQ-004"
-  - id: "OD-2026-005"
-    status: "open"
-    question: "Which operational actions remain available while a tenant is suspended?"
+  - id: "DEC-2026-007"
+    status: "accepted"
+    decision: "Suspended tenants allow read access, owner account access, platform operator access, and administrative actions required to restore service while blocking operational write actions."
+    rationale: "Suspension stops operations without preventing account recovery or platform support."
+    date: "2026-05-03"
     owner: "product_owner"
     affected_requirements:
       - "01-domain.tenant.REQ-012"
+
+open_decisions: []
