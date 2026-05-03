@@ -1,0 +1,46 @@
+id: "05-identity-access.tenant-staff-identity"
+title: "Tenant Staff Identity"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define identity model for owner and staff users within a tenant."
+  binding_policy: "All users exist only within a single tenant database and cannot access other tenants."
+
+authority:
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  user_and_access: "specs/01-domain/user-and-access.yaml"
+  security: "specs/03-technical/security.yaml"
+
+identity_model:
+  requirement_id: "05-identity-access.identity.REQ-001"
+  tenant_scoped_users: true
+  cross_tenant_users_forbidden: true
+  authentication_method: "email_password"
+
+owner_identity:
+  requirement_id: "05-identity-access.identity.REQ-002"
+  exactly_one_owner_per_tenant: true
+  owner_has_full_permissions: true
+
+staff_identity:
+  requirement_id: "05-identity-access.identity.REQ-003"
+  max_staff_limit: 30
+  staff_created_by_owner: true
+  staff_can_be_disabled: true
+
+session_model:
+  requirement_id: "05-identity-access.identity.REQ-004"
+  authentication_issues_jwt: true
+  jwt_is_tenant_scoped: true
+  jwt_must_include:
+    - "tenant_id"
+    - "user_id"
+    - "user_type"
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/01-domain/user-and-access.yaml"
+
+open_decisions: []
