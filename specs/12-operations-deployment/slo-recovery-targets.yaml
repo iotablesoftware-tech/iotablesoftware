@@ -1,0 +1,22 @@
+id: "12-operations-deployment.slo-recovery-targets"
+title: "SLO and Recovery Targets"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define service level objectives and recovery expectations for IoTable backend."
+  binding_policy: "System must meet defined availability and recovery expectations before production use."
+
+slo:
+  requirement_id: "12-ops.slo.REQ-001"
+  availability_target: "99.5%"
+  api_latency_target_ms: 300
+  error_rate_threshold: "<1%"
+
+recovery:
+  requirement_id: "12-ops.slo.REQ-002"
+  mean_time_to_recover_minutes: 30
+  tenant_database_recovery_must_be_isolated: true
+  platform_registry_recovery_must_not_corrupt_tenant_data: true
+
+open_decisions: []
