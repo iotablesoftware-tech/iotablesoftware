@@ -1,0 +1,22 @@
+id: "06-application-surfaces.tenant-setup-console"
+title: "Tenant Setup Console"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define owner-facing setup console used during initial tenant configuration."
+
+setup_steps:
+  requirement_id: "06-application-surfaces.tenant-setup.REQ-001"
+  steps:
+    - "login_as_owner"
+    - "create_areas"
+    - "create_tables"
+    - "configure_menu"
+    - "mark_setup_complete"
+
+rules:
+  requirement_id: "06-application-surfaces.tenant-setup.REQ-002"
+  setup_must_be_completed_before_full_operation: true
+
+open_decisions: []
