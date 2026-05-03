@@ -1,0 +1,39 @@
+id: "04-tenancy.tenant-resolution"
+title: "Tenant Resolution"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define how incoming requests are mapped to tenant context using subdomain resolution."
+  binding_policy: "Tenant must be resolved before authentication and business logic execution."
+
+authority:
+  api_contracts: "specs/03-technical/api-contracts.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+
+resolution_model:
+  requirement_id: "04-tenancy.resolution.REQ-001"
+  source: "subdomain"
+  example: "tenant1.iotable.app"
+  must_resolve_to:
+    - "tenant_id"
+    - "tenant_status"
+    - "database_connection_reference"
+
+resolution_rules:
+  requirement_id: "04-tenancy.resolution.REQ-002"
+  resolution_must_occur_before_authentication: true
+  unresolved_tenant_returns_404: true
+  tenant_context_must_not_be_taken_from_request_body: true
+
+security_rules:
+  requirement_id: "04-tenancy.resolution.REQ-003"
+  cross_tenant_resolution_forbidden: true
+  invalid_subdomain_must_not_leak_valid_tenant_information: true
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/03-technical/api-contracts.yaml"
+
+open_decisions: []
