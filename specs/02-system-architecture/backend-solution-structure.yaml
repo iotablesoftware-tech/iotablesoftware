@@ -1,0 +1,48 @@
+id: "02-system-architecture.backend-solution-structure"
+title: "Backend Solution Structure"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define backend project structure, module boundaries, and responsibility separation for IoTable implementation repositories."
+  binding_policy: "Backend implementations must follow clear module separation aligned with domain and capability specifications."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  architecture_style: "specs/02-system-architecture/architecture-style.yaml"
+
+backend_structure:
+  requirement_id: "02-system-architecture.backend-structure.REQ-001"
+  modules:
+    - "tenant_resolution"
+    - "auth"
+    - "user_access"
+    - "area_table"
+    - "table_session"
+    - "order_management"
+    - "menu_catalog"
+    - "payment"
+    - "realtime"
+    - "platform_registry"
+
+module_rules:
+  requirement_id: "02-system-architecture.backend-structure.REQ-002"
+  modules_must_not_directly_access_other_module_internal_state: true
+  shared_contracts_must_be_explicit: true
+  cross_module_calls_must_respect_tenant_context: true
+
+infrastructure_layers:
+  requirement_id: "02-system-architecture.backend-structure.REQ-003"
+  layers:
+    - "api_layer"
+    - "application_layer"
+    - "domain_layer"
+    - "persistence_layer"
+  business_logic_must_reside_in_application_or_domain_layer: true
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/02-system-architecture/architecture-style.yaml"
+
+open_decisions: []
