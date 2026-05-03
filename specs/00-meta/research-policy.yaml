@@ -1,0 +1,59 @@
+id: "00-meta.research-policy"
+title: "Research Policy"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define how technical, architectural, security, deployment, framework, and tooling research is performed for IoTable specification and implementation work."
+  binding_policy: "Research informs technical choices but does not override product-owner decisions or canonical specification documents."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  source_policy: "specs/00-meta/source-policy.yaml"
+  llm_execution_policy: "specs/00-meta/llm-execution-policy.yaml"
+
+research_required_when:
+  requirement_id: "00-meta.research-policy.REQ-001"
+  conditions:
+    - "selecting_or_updating_frameworks"
+    - "making_security_sensitive_technical_decisions"
+    - "choosing_deployment_or_runtime_infrastructure"
+    - "using_version_sensitive_library_behavior"
+    - "selecting_database_or_migration_tooling"
+    - "designing_external_integration_behavior"
+
+source_priority:
+  requirement_id: "00-meta.research-policy.REQ-002"
+  order:
+    - "project_owner_binding_decision"
+    - "canonical_repository_specification"
+    - "official_technical_documentation"
+    - "formal_standard_or_rfc"
+    - "vendor_security_guidance"
+    - "widely_adopted_community_practice"
+  llm_memory_authority: "none"
+
+research_output_policy:
+  requirement_id: "00-meta.research-policy.REQ-003"
+  research_must_record:
+    - "question"
+    - "sources_considered"
+    - "decision_or_recommendation"
+    - "rationale"
+    - "affected_documents"
+  product_behavior_must_not_be_created_by_research: true
+  owner_decision_required_for_product_behavior: true
+
+final_state_authoring_policy:
+  requirement_id: "00-meta.research-policy.REQ-004"
+  research_results_must_be_applied_as_current_final_state: true
+  historical_change_notes_forbidden: true
+  migration_language_forbidden: true
+
+traceability:
+  source_type: "repository_governance"
+  source_reference:
+    - "specs/00-meta/specification-constitution.yaml"
+    - "specs/00-meta/source-policy.yaml"
+
+open_decisions: []
