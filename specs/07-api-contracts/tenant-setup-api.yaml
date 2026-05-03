@@ -1,0 +1,25 @@
+id: "07-api-contracts.tenant-setup-api"
+title: "Tenant Setup API"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define APIs used during tenant setup phase by owner."
+
+routes:
+  requirement_id: "07-api.tenant-setup.REQ-001"
+  create_area:
+    method: "POST"
+    path: "/api/v1/areas"
+  create_table:
+    method: "POST"
+    path: "/api/v1/tables"
+  create_menu_item:
+    method: "POST"
+    path: "/api/v1/menu/items"
+
+rules:
+  requirement_id: "07-api.tenant-setup.REQ-002"
+  requires_owner_role: true
+
+open_decisions: []
