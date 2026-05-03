@@ -1,0 +1,29 @@
+id: "03-domain.customer-order-session-workflow"
+title: "Customer Order Session Workflow"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define customer ordering workflow within a table session using immutable orders."
+  binding_policy: "Ordering behavior must follow table session model with independent submitted orders."
+
+authority:
+  table_service: "specs/02-capabilities/table-service.yaml"
+  order_management: "specs/02-capabilities/order-management.yaml"
+
+workflow:
+  requirement_id: "03-domain.order-session.REQ-001"
+  flow:
+    - "table_session_exists_or_is_created"
+    - "order_created_in_open_state"
+    - "items_added_to_order"
+    - "order_submitted"
+    - "order_becomes_immutable"
+    - "additional_requests_create_new_orders"
+
+traceability:
+  source_type: "canonical_specification"
+  source_reference:
+    - "specs/02-capabilities/order-management.yaml"
+
+open_decisions: []
