@@ -58,7 +58,9 @@ split_payment_policy:
       - "selected_items"
   settlement_rules:
     requirement_id: "02-capabilities.payment.REQ-007"
-    total_recorded_payment_must_not_exceed_payable_total_unless_tip_or_overpayment_policy_exists: true
+    total_recorded_payment_must_not_exceed_payable_total: true
+    tips_supported: false
+    overpayments_supported: false
     same_order_may_receive_multiple_payments: true
     same_table_session_may_receive_multiple_payments: true
 
@@ -75,6 +77,7 @@ payable_amount_policy:
   unpaid_balance:
     requirement_id: "02-capabilities.payment.REQ-010"
     calculated_as_payable_total_minus_recorded_non_voided_payments: true
+    must_not_be_negative: true
 
 closing_policy:
   manual_session_close:
@@ -137,6 +140,7 @@ traceability:
   source_type: "owner_decision"
   source_reference:
     - "DEC-2026-016"
+    - "DEC-2026-017"
     - "specs/02-capabilities/table-service.yaml"
     - "specs/02-capabilities/order-management.yaml"
     - "specs/02-capabilities/menu-catalog.yaml"
@@ -153,12 +157,14 @@ owner_decisions:
       - "02-capabilities.payment.REQ-005"
       - "02-capabilities.payment.REQ-011"
       - "02-capabilities.payment.REQ-012"
-
-open_decisions:
-  - id: "OD-2026-008"
-    status: "open"
-    question: "Are tips or overpayments supported in the initial payment model?"
+  - id: "DEC-2026-017"
+    status: "accepted"
+    decision: "Tips and overpayments are not supported in the initial payment model. Recorded payments must not exceed payable balance."
+    rationale: "The initial payment model stays simple and avoids settlement ambiguity."
+    date: "2026-05-03"
     owner: "product_owner"
     affected_requirements:
       - "02-capabilities.payment.REQ-007"
       - "02-capabilities.payment.REQ-010"
+
+open_decisions: []
