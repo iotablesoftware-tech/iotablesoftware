@@ -1,0 +1,117 @@
+id: "03-technical.observability"
+title: "Observability"
+status: "canonical"
+version: "1.0.0"
+
+purpose:
+  primary_purpose: "Define logging, metrics, tracing, diagnostics, audit separation, and operational visibility requirements for IoTable."
+  binding_policy: "All implementation repositories must emit enough operational data to debug tenant-scoped requests, realtime behavior, order flow, payment flow, and support activity without exposing private tenant data across boundaries."
+
+authority:
+  constitution: "specs/00-meta/specification-constitution.yaml"
+  tenant_domain: "specs/01-domain/tenant.yaml"
+  api_contracts: "specs/03-technical/api-contracts.yaml"
+  data_model: "specs/03-technical/data-model.yaml"
+  security: "specs/03-technical/security.yaml"
+
+logging_policy:
+  structured_logging:
+    requirement_id: "03-technical.observability.REQ-001"
+    required: true
+    format: "json"
+    log_levels:
+      - "debug"
+      - "info"
+      - "warn"
+      - "error"
+  required_log_context:
+    requirement_id: "03-technical.observability.REQ-002"
+    fields:
+      - "request_id"
+      - "tenant_id_when_available"
+      - "user_id_when_available"
+      - "route"
+      - "operation"
+      - "status_code"
+      - "duration_ms"
+  sensitive_data_policy:
+    requirement_id: "03-technical.observability.REQ-003"
+    log_passwords_forbidden: true
+    log_jwt_tokens_forbidden: true
+    log_database_credentials_forbidden: true
+    log_payment_sensitive_data_forbidden: true
+    tenant_private_data_in_platform_logs_must_be_minimized: true
+
+request_tracing:
+  requirement_id: "03-technical.observability.REQ-004"
+  request_id_required: true
+  request_id_must_be_returned_in_error_response: true
+  request_id_must_propagate_to_realtime_side_effects: true
+  trace_id_allowed: true
+
+metrics_policy:
+  requirement_id: "03-technical.observability.REQ-005"
+  required: true
+  tenant_scoped_metrics_allowed: true
+  metrics_must_not_expose_private_tenant_payload: true
+  required_metrics:
+    - "http_request_count"
+    - "http_request_duration_ms"
+    - "http_error_count"
+    - "tenant_resolution_failure_count"
+    - "login_success_count"
+    - "login_failure_count"
+    - "order_submitted_count"
+    - "payment_recorded_count"
+    - "table_session_closed_count"
+    - "realtime_connection_count"
+    - "realtime_event_delivery_failure_count"
+
+health_checks:
+  requirement_id: "03-technical.observability.REQ-006"
+  required: true
+  public_health_endpoint: "/api/v1/health"
+  must_check:
+    - "application_process"
+  authenticated_diagnostics_may_check:
+    - "platform_registry_database"
+    - "tenant_database_connectivity"
+    - "realtime_transport"
+
+audit_vs_operational_logs:
+  requirement_id: "03-technical.observability.REQ-007"
+  audit_events_are_persistent_business_security_records: true
+  operational_logs_are_diagnostic_records: true
+  audit_events_must_not_be_replaced_by_logs: true
+  logs_must_not_be_used_as_only_audit_source: true
+
+realtime_observability:
+  requirement_id: "03-technical.observability.REQ-008"
+  connection_lifecycle_events_logged: true
+  realtime_delivery_failures_logged: true
+  tenant_scope_required_for_realtime_logs: true
+  cross_tenant_delivery_attempt_must_emit_security_log: true
+
+payment_observability:
+  requirement_id: "03-technical.observability.REQ-009"
+  payment_recording_success_logged: true
+  payment_recording_failure_logged: true
+  payment_void_success_logged: true
+  payment_balance_conflict_logged: true
+  sensitive_payment_details_must_not_be_logged: true
+
+error_observability:
+  requirement_id: "03-technical.observability.REQ-010"
+  unhandled_errors_logged: true
+  validation_errors_logged_without_sensitive_payload: true
+  authorization_failures_logged: true
+  cross_tenant_access_attempts_logged_as_security_events: true
+
+traceability:
+  source_type: "system_design"
+  source_reference:
+    - "specs/03-technical/api-contracts.yaml"
+    - "specs/03-technical/security.yaml"
+    - "specs/03-technical/data-model.yaml"
+
+open_decisions: []
